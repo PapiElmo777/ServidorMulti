@@ -19,12 +19,16 @@ public class UnCliente implements Runnable {
             try{
                 mensaje = entrada.readUTF();
                 if (mensaje.startsWith("@")){
-                    String [] partes = mensaje.split(" ");
-                    String aQuien = partes[0].substring(1);
-                    int aQuienNum = Integer.parseInt(aQuien);
-                    UnCliente clientecito = ServidorMulti.clientes.get(aQuien);
-                    clientecito.salida.writeUTF(mensaje);
-                    return;
+                    String [] partes = mensaje.split(" ", 2); // Divide en dos partes: destinatarios y mensaje
+                    String aQuienes = partes[0].substring(1); // Remueve el "@"
+                    String[] idsDestinatarios = aQuienes.split(","); // Separa los IDs por comas
+
+                    for (String id : idsDestinatarios) {
+                        UnCliente clientecito = ServidorMulti.clientes.get(id.trim());
+                        if (clientecito != null) {
+                            clientecito.salida.writeUTF(partes[1]);
+                        }
+                    }
                 }else{
                     for(UnCliente cliente : ServidorMulti.clientes.values()){
                         cliente.salida.writeUTF(mensaje);
