@@ -15,5 +15,9 @@ public class ClienteMulti {
         Thread hiloParaRecibir = new Thread(paraRecibir);
         hiloParaRecibir.start();
     }
-//javac -d ../out/production/ServidorMulti/ servidormulti/*.java clientemulti/*.java
+
+   /* Terminal
+   cd /Users/alfredojimenez/IdeaProjects/ServidorMulti/out/production/ServidorMulti/
+   java clientemulti.ClienteMulti
+    */
 }
