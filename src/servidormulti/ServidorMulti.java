@@ -13,7 +13,7 @@ public class ServidorMulti {
         int contador = 0;
         while(true){
             Socket s = servidorSocket.accept();
-            UnCliente unCliente = new UnCliente(s);
+            UnCliente unCliente = new UnCliente(s, Integer.toString(contador));
             Thread hilo = new Thread(unCliente);
             clientes.put(Integer.toString(contador), unCliente);
             hilo.start();
