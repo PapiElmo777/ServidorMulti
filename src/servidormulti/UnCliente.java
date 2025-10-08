@@ -45,6 +45,21 @@ public class UnCliente implements Runnable {
                         }
                         continue;
                     }
+                    if (comando[0].equalsIgnoreCase("/login") && comando.length == 3) {
+                        String usuario = comando[1];
+                        String pass = comando[2];
+                        if (ServidorMulti.usuariosRegistrados.containsKey(usuario) && ServidorMulti.usuariosRegistrados.get(usuario).equals(pass)) {
+                            this.nombreUsuario = usuario;
+                            this.estaAutenticado = true;
+                            salida.writeUTF("Bienvenido de nuevo shavalon, " + this.nombreUsuario);
+                        } else {
+                            salida.writeUTF("Error: Usuario o contraseña incorrectos.");
+                        }
+                        continue;
+                    }
+                    salida.writeUTF("Comando en formato incorrecto.");
+                    continue;
+                }
 
                     if (mensaje.startsWith("@")){
                     String [] partes = mensaje.split(" ", 2);
