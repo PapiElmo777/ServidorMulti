@@ -30,9 +30,23 @@ public class UnCliente implements Runnable {
         while (true){
             try{
                 mensaje = entrada.readUTF();
-                String mensajeConRemitente = "Cliente #" + clienteId + ": " + mensaje;
+                if (mensaje.startsWith("/")) {
+                    String[] comando = mensaje.split(" ");
+                    if (comando[0].equalsIgnoreCase("/registrar") && comando.length == 3) {
+                        String usuario = comando[1];
+                        String pass = comando[2];
+                        if (ServidorMulti.usuariosRegistrados.containsKey(usuario)) {
+                            salida.writeUTF("Error: El nombre de usuario ya existe.");
+                        } else {
+                            ServidorMulti.usuariosRegistrados.put(usuario, pass);
+                            this.nombreUsuario = usuario;
+                            this.estaAutenticado = true;
+                            salida.writeUTF("Has iniciado sesión como: " + this.nombreUsuario);
+                        }
+                        continue;
+                    }
 
-                if (mensaje.startsWith("@")){
+                    if (mensaje.startsWith("@")){
                     String [] partes = mensaje.split(" ", 2);
                     String aQuienes = partes[0].substring(1);
                     String[] idsDestinatarios = aQuienes.split(",");
