@@ -60,7 +60,10 @@ public class UnCliente implements Runnable {
                     salida.writeUTF("Comando en formato incorrecto.");
                     continue;
                 }
-
+                if (!estaAutenticado && mensajesEnviados >= 3) {
+                    salida.writeUTF("Llegaste al Límite de mensajes shavalon. Por favor, regístrate o inicia sesión para continuar enviando mensajes.");
+                    continue;
+                }
                     if (mensaje.startsWith("@")){
                     String [] partes = mensaje.split(" ", 2);
                     String aQuienes = partes[0].substring(1);
