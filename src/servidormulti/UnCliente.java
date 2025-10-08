@@ -19,6 +19,14 @@ public class UnCliente implements Runnable {
     @Override
     public void run() {
         String mensaje;
+        try{
+            salida.writeUTF("Que rollo shavalon, eres invitado #" + clienteId);
+            salida.writeUTF("Tienes 3 mensajes gratis, despues tendras que registrarte o iniciar sesion.");
+            salida.writeUTF("Para registrarte hazlo asi: /registrar <user> <pass>");
+            salida.writeUTF("Para loguearte hazlo asi: /login <user> <pass>");
+        }catch (IOException e){
+
+        }
         while (true){
             try{
                 mensaje = entrada.readUTF();
