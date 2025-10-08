@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 public class ServidorMulti {
     static HashMap<String,UnCliente> clientes = new HashMap<String,UnCliente>();
+    static HashMap<String, String> usuariosRegistrados = new HashMap<>();
 
     public static void main(String[] args) throws IOException{
         ServerSocket servidorSocket = new ServerSocket(8080);
