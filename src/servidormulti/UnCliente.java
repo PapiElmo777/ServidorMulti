@@ -7,6 +7,9 @@ public class UnCliente implements Runnable {
     final DataOutputStream salida;
     final DataInputStream entrada;
     final String clienteId;
+    private int mensajesEnviados = 0;
+    private boolean estaAutenticado = false;
+    private String nombreUsuario = null;
     UnCliente(Socket s, String clienteId) throws IOException{
         this.clienteId = clienteId;
         salida = new DataOutputStream(s.getOutputStream());
