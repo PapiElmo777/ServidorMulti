@@ -24,6 +24,7 @@ public class UnCliente implements Runnable {
             salida.writeUTF("Tienes 3 mensajes gratis, despues tendras que registrarte o iniciar sesion.");
             salida.writeUTF("Para registrarte hazlo asi: /registrar <user> <pass>");
             salida.writeUTF("Para loguearte hazlo asi: /login <user> <pass>");
+            salida.writeUTF("Para cerrar sesion /logout");
         }catch (IOException e){
 
         }
@@ -32,6 +33,23 @@ public class UnCliente implements Runnable {
                 mensaje = entrada.readUTF();
                 if (mensaje.startsWith("/")) {
                     String[] comando = mensaje.split(" ");
+                    if (comando[0].equalsIgnoreCase("/logout")) {
+                        if (estaAutenticado) {
+                            String usuarioAnterior = this.nombreUsuario;
+                            this.estaAutenticado = false;
+                            this.nombreUsuario = null;
+                            this.mensajesEnviados = 0;
+                            salida.writeUTF("Adios '" + usuarioAnterior + "'. Ahora eres un invitado.");
+                            for (UnCliente cliente : ServidorMulti.clientes.values()) {
+                                if (!this.clienteId.equals(cliente.clienteId)) {
+                                    cliente.salida.writeUTF(">> El usuario '" + usuarioAnterior + "' ha cerrado sesión. <<");
+                                }
+                            }
+                        } else {
+                            salida.writeUTF("No has iniciado sesión, no puedes usar /logout.");
+                        }
+                        continue;
+                    }
                     if (comando[0].equalsIgnoreCase("/registrar") && comando.length == 3) {
                         String usuario = comando[1];
                         String pass = comando[2];
