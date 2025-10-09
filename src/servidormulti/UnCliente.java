@@ -64,20 +64,30 @@ public class UnCliente implements Runnable {
                     salida.writeUTF("Llegaste al Límite de mensajes shavalon. Por favor, regístrate o inicia sesión para continuar enviando mensajes.");
                     continue;
                 }
-                    if (mensaje.startsWith("@")){
+                String remitente = estaAutenticado ? this.nombreUsuario : "Invitado #" + clienteId;
+                if (!estaAutenticado) {
+                    mensajesEnviados++;
+                }
+                if (mensaje.startsWith("@")){
                     String [] partes = mensaje.split(" ", 2);
+                    if (partes.length < 2) {
+                        salida.writeUTF("Formato de mensaje privado incorrecto. Usa @usuario1,usuario2 mensaje");
+                        continue;
+                    }
                     String aQuienes = partes[0].substring(1);
                     String[] idsDestinatarios = aQuienes.split(",");
+                    String mensajePrivado = "(Privado) " + remitente + ": " + partes[1];
 
                     for (String id : idsDestinatarios) {
                         UnCliente clientecito = ServidorMulti.clientes.get(id.trim());
                         if (clientecito != null) {
-                            clientecito.salida.writeUTF("(Privado) " + mensajeConRemitente);
+                            clientecito.salida.writeUTF(mensajePrivado);
                         }
                     }
-                }else{
+                } else {
+                    String mensajeConRemitente = remitente + ": " + mensaje;
                     for(UnCliente cliente : ServidorMulti.clientes.values()){
-                        if (!this.clienteId.equals(cliente.clienteId)){
+                        if (!this.clienteId.equals(cliente.clienteId)) {
                             cliente.salida.writeUTF(mensajeConRemitente);
                         }
                     }
