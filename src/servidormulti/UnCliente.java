@@ -93,7 +93,7 @@ public class UnCliente implements Runnable {
                     }
                 }
             }catch (IOException ex){
-                System.out.println("Cliente #" + clienteId + " se ha desconectado.");
+                System.out.println("Shavalon #" + clienteId + " se ha desconectado.");
                 ServidorMulti.clientes.remove(this.clienteId);
                 break;
             }
