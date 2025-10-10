@@ -93,13 +93,20 @@ public class UnCliente implements Runnable {
                         continue;
                     }
                     String aQuienes = partes[0].substring(1);
-                    String[] idsDestinatarios = aQuienes.split(",");
+                    String[] nombresDestinatarios = aQuienes.split(",");
                     String mensajePrivado = "(Privado) " + remitente + ": " + partes[1];
 
-                    for (String id : idsDestinatarios) {
-                        UnCliente clientecito = ServidorMulti.clientes.get(id.trim());
-                        if (clientecito != null) {
-                            clientecito.salida.writeUTF(mensajePrivado);
+                    for (String destNombre : nombresDestinatarios) {
+                        boolean encontrado = false;
+                        for (UnCliente clienteDestino : ServidorMulti.clientes.values()) {
+                            if (destNombre.trim().equals(clienteDestino.nombreUsuario) || destNombre.trim().equals(clienteDestino.clienteId)) {
+                                clienteDestino.salida.writeUTF(mensajePrivado);
+                                encontrado = true;
+                                break;
+                            }
+                        }
+                        if (!encontrado) {
+                            salida.writeUTF("El usuario '" + destNombre.trim() + "' no fue encontrado o no está conectado.");
                         }
                     }
                 } else {
