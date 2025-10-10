@@ -51,6 +51,10 @@ public class UnCliente implements Runnable {
                         continue;
                     }
                     if (comando[0].equalsIgnoreCase("/registrar") && comando.length == 3) {
+                        if (estaAutenticado) {
+                            salida.writeUTF("Chavalon estas en una sesión activa no puedes registrar una nueva cuenta.");
+                            continue;
+                        }
                         String usuario = comando[1];
                         String pass = comando[2];
                         if (ServidorMulti.usuariosRegistrados.containsKey(usuario)) {
@@ -64,6 +68,10 @@ public class UnCliente implements Runnable {
                         continue;
                     }
                     if (comando[0].equalsIgnoreCase("/login") && comando.length == 3) {
+                        if (estaAutenticado) {
+                            salida.writeUTF("Chavalon estas en una sesión activa no puedes iniciar sesión con otra cuenta.");
+                            continue;
+                        }
                         String usuario = comando[1];
                         String pass = comando[2];
                         if (ServidorMulti.usuariosRegistrados.containsKey(usuario) && ServidorMulti.usuariosRegistrados.get(usuario).equals(pass)) {
