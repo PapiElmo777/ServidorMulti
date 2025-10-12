@@ -1,8 +1,6 @@
 package servidormulti;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -31,7 +29,7 @@ public class ServidorMulti {
             System.out.println("Cargando usuarios desde el archivo...");
             while (scanner.hasNextLine()) {
                 String linea = scanner.nextLine();
-                String[] partes = linea.split(":", 2); // Divide en "usuario:contraseña"
+                String[] partes = linea.split(":", 2);
                 if (partes.length == 2) {
                     usuariosRegistrados.put(partes[0], partes[1]);
                 }
@@ -39,6 +37,14 @@ public class ServidorMulti {
             System.out.println(usuariosRegistrados.size() + " usuarios cargados.");
         } catch (FileNotFoundException e) {
             System.out.println("Archivo de usuarios no encontrado. Se creará uno nuevo al registrar el primer usuario.");
+        }
+    }
+    public static synchronized void guardarUsuarioEnArchivo(String usuario, String password) {
+        try (PrintWriter out = new PrintWriter(new FileWriter(ARCHIVO_USUARIOS, true))) {
+            out.println(usuario + ":" + password);
+            System.out.println("Nuevo usuario '" + usuario + "' guardado en el archivo.");
+        } catch (IOException e) {
+            System.err.println("Error al escribir en el archivo de usuarios: " + e.getMessage());
         }
     }
 }
