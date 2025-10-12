@@ -12,6 +12,7 @@ public class ServidorMulti {
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public static void main(String[] args) throws IOException{
+        cargarUsuarios();
         ServerSocket servidorSocket = new ServerSocket(8080);
         int contador = 0;
         while(true){

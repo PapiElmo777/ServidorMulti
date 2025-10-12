@@ -61,6 +61,7 @@ public class UnCliente implements Runnable {
                             salida.writeUTF("Error: El nombre de usuario ya existe.");
                         } else {
                             ServidorMulti.usuariosRegistrados.put(usuario, pass);
+                            ServidorMulti.guardarUsuarioEnArchivo(usuario, pass);
                             this.nombreUsuario = usuario;
                             this.estaAutenticado = true;
                             salida.writeUTF("Has iniciado sesión como: " + this.nombreUsuario);
