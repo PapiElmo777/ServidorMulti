@@ -14,6 +14,7 @@ public class ServidorMulti {
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public static void main(String[] args) throws IOException {
+        cargarUsuarios();
         ServerSocket servidorSocket = new ServerSocket(8080);
         System.out.println("Servidor refactorizado iniciado en el puerto 8080.");
         int contador = 0;
@@ -103,5 +104,12 @@ public class ServidorMulti {
                 remitente.enviarMensaje("El usuario '" + destNombre.trim() + "' no fue encontrado o no está conectado.");
             }
         }
+    }
+    public static boolean cuentaYaEnUso(String usuario) {
+        for (UnCliente cliente : clientesConectados.values()) {
+            if (java.util.Objects.equals(usuario, cliente.getNombreUsuario())) {
+            }
+        }
+        return false;
     }
 }
