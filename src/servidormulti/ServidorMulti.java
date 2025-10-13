@@ -83,4 +83,22 @@ public class ServidorMulti {
             }
         }
     }
+    public static void enviarMensajePrivado(UnCliente remitente, String destinatarios, String mensaje) throws IOException {
+        String mensajeCompleto = "(Privado) " + remitente.getNombreRemitente() + ": " + mensaje;
+        String[] nombresDestinatarios = destinatarios.split(",");
+
+        for (String destNombre : nombresDestinatarios) {
+            boolean encontrado = false;
+            for (UnCliente clienteDestino : clientesConectados.values()) {
+                if (destNombre.trim().equals(clienteDestino.getNombreUsuario()) || destNombre.trim().equals(clienteDestino.getClienteId())) {
+                    clienteDestino.enviarMensaje(mensajeCompleto);
+                    encontrado = true;
+                    break;
+                }
+            }
+            if (!encontrado) {
+                remitente.enviarMensaje("El usuario '" + destNombre.trim() + "' no fue encontrado o no está conectado.");
+            }
+        }
+    }
 }
