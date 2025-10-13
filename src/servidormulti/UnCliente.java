@@ -134,6 +134,20 @@ public class UnCliente implements Runnable {
             }
         }
     }
+    private void registrar(String usuario, String pass) throws IOException {
+        if (estaAutenticado) {
+            enviarMensaje("Ya tienes una sesión activa. Usa /logout para registrar una nueva cuenta.");
+            return;
+        }
+        if (ServidorMulti.registrarUsuario(usuario, pass)) {
+            this.nombreUsuario = usuario;
+            this.estaAutenticado = true;
+            enviarMensaje("¡Registro exitoso! Has iniciado sesión como: " + this.nombreUsuario);
+        } else {
+            enviarMensaje("Error: El nombre de usuario ya existe.");
+        }
+    }
+
     public String getClienteId() { return clienteId; }
     public String getNombreUsuario() { return nombreUsuario; }
     public String getNombreRemitente() {
