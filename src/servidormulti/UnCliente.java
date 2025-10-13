@@ -53,6 +53,10 @@ public class UnCliente implements Runnable {
             enviarMensaje("Ya tienes una sesión activa. Usa /logout para iniciar sesión con otra cuenta.");
             return;
         }
+        if (ServidorMulti.cuentaYaEnUso(usuario)) {
+            enviarMensaje("Error: La cuenta '" + usuario + "' ya está siendo utilizada por otro cliente.");
+            return;
+        }
         if (ServidorMulti.autenticarUsuario(usuario, pass)) {
             this.nombreUsuario = usuario;
             this.estaAutenticado = true;
