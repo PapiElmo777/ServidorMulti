@@ -147,6 +147,19 @@ public class UnCliente implements Runnable {
             enviarMensaje("Error: El nombre de usuario ya existe.");
         }
     }
+    private void login(String usuario, String pass) throws IOException {
+        if (estaAutenticado) {
+            enviarMensaje("Ya tienes una sesión activa. Usa /logout para iniciar sesión con otra cuenta.");
+            return;
+        }
+        if (ServidorMulti.autenticarUsuario(usuario, pass)) {
+            this.nombreUsuario = usuario;
+            this.estaAutenticado = true;
+            enviarMensaje("Bienvenido de nuevo shavalon, " + this.nombreUsuario);
+        } else {
+            enviarMensaje("Error: Usuario o contraseña incorrectos.");
+        }
+    }
 
     public String getClienteId() { return clienteId; }
     public String getNombreUsuario() { return nombreUsuario; }
