@@ -172,6 +172,26 @@ public class UnCliente implements Runnable {
         enviarMensaje("Adios '" + usuarioAnterior + "'. Ahora eres un invitado.");
         ServidorMulti.enviarMensajePublico(this, ">> El usuario '" + usuarioAnterior + "' ha cerrado sesión. <<", true);
     }
+    private void procesarComando(String linea) throws IOException {
+        String[] partes = linea.split(" ", 3);
+        String comando = partes[0].toLowerCase();
+
+        switch (comando) {
+            case "/registrar":
+                if (partes.length == 3) registrar(partes[1], partes[2]);
+                else enviarMensaje("Formato incorrecto. Usa: /registrar <user> <pass>");
+                break;
+            case "/login":
+                if (partes.length == 3) login(partes[1], partes[2]);
+                else enviarMensaje("Formato incorrecto. Usa: /login <user> <pass>");
+                break;
+            case "/logout":
+                logout();
+                break;
+            default:
+                enviarMensaje("Comando no reconocido.");
+        }
+    }
 
     public String getClienteId() { return clienteId; }
     public String getNombreUsuario() { return nombreUsuario; }
