@@ -108,6 +108,7 @@ public class ServidorMulti {
     public static boolean cuentaYaEnUso(String usuario) {
         for (UnCliente cliente : clientesConectados.values()) {
             if (java.util.Objects.equals(usuario, cliente.getNombreUsuario())) {
+                return true;
             }
         }
         return false;
