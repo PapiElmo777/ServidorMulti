@@ -192,6 +192,26 @@ public class UnCliente implements Runnable {
                 enviarMensaje("Comando no reconocido.");
         }
     }
+    private void procesarMensajeChat(String mensaje) throws IOException {
+        if (!estaAutenticado && mensajesEnviados >= 3) {
+            enviarMensaje("Llegaste al Límite de mensajes shavalon. Por favor, regístrate o inicia sesión.");
+            return;
+        }
+        if (!estaAutenticado) {
+            mensajesEnviados++;
+        }
+        if (mensaje.startsWith("@")) {
+            String[] partes = mensaje.split(" ", 2);
+            if (partes.length < 2) {
+                enviarMensaje("Formato de mensaje privado incorrecto. Usa @usuario1,usuario2 mensaje");
+                return;
+            }
+            ServidorMulti.enviarMensajePrivado(this, partes[0].substring(1), partes[1]);
+        } else {
+            ServidorMulti.enviarMensajePublico(this, mensaje, false);
+        }
+    }
+
 
     public String getClienteId() { return clienteId; }
     public String getNombreUsuario() { return nombreUsuario; }
