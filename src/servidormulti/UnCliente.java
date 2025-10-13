@@ -211,6 +211,13 @@ public class UnCliente implements Runnable {
             ServidorMulti.enviarMensajePublico(this, mensaje, false);
         }
     }
+    private void enviarMensajesDeBienvenida() throws IOException {
+        enviarMensaje("Que rollo shavalon, eres invitado #" + clienteId);
+        enviarMensaje("Tienes 3 mensajes gratis, despues tendras que registrarte o iniciar sesion.");
+        enviarMensaje("--> /registrar <user> <pass>");
+        enviarMensaje("--> /login <user> <pass>");
+        enviarMensaje("--> /logout");
+    }
 
 
     public String getClienteId() { return clienteId; }
