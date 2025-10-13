@@ -19,119 +19,20 @@ public class UnCliente implements Runnable {
 
     @Override
     public void run() {
-        String mensaje;
-        try{
-            salida.writeUTF("Que rollo shavalon, eres invitado #" + clienteId);
-            salida.writeUTF("Tienes 3 mensajes gratis, despues tendras que registrarte o iniciar sesion.");
-            salida.writeUTF("Para registrarte hazlo asi: /registrar <user> <pass>");
-            salida.writeUTF("Para loguearte hazlo asi: /login <user> <pass>");
-            salida.writeUTF("Para cerrar sesion /logout");
-        }catch (IOException e){
-
-        }
-        while (true){
-            try{
-                mensaje = entrada.readUTF();
-                if (mensaje.startsWith("/")) {
-                    String[] comando = mensaje.split(" ");
-                    if (comando[0].equalsIgnoreCase("/logout")) {
-                        if (estaAutenticado) {
-                            String usuarioAnterior = this.nombreUsuario;
-                            this.estaAutenticado = false;
-                            this.nombreUsuario = null;
-                            this.mensajesEnviados = 0;
-                            salida.writeUTF("Adios '" + usuarioAnterior + "'. Ahora eres un invitado.");
-                            for (UnCliente cliente : ServidorMulti.clientes.values()) {
-                                if (!this.clienteId.equals(cliente.clienteId)) {
-                                    cliente.salida.writeUTF(">> El usuario '" + usuarioAnterior + "' ha cerrado sesión. <<");
-                                }
-                            }
-                        } else {
-                            salida.writeUTF("No has iniciado sesión, no puedes usar /logout.");
-                        }
-                        continue;
-                    }
-                    if (comando[0].equalsIgnoreCase("/registrar") && comando.length == 3) {
-                        if (estaAutenticado) {
-                            salida.writeUTF("Chavalon estas en una sesión activa no puedes registrar una nueva cuenta.");
-                            continue;
-                        }
-                        String usuario = comando[1];
-                        String pass = comando[2];
-                        if (ServidorMulti.usuariosRegistrados.containsKey(usuario)) {
-                            salida.writeUTF("Error: El nombre de usuario ya existe.");
-                        } else {
-                            ServidorMulti.usuariosRegistrados.put(usuario, pass);
-                            ServidorMulti.guardarUsuarioEnArchivo(usuario, pass);
-                            this.nombreUsuario = usuario;
-                            this.estaAutenticado = true;
-                            salida.writeUTF("Has iniciado sesión como: " + this.nombreUsuario);
-                        }
-                        continue;
-                    }
-                    if (comando[0].equalsIgnoreCase("/login") && comando.length == 3) {
-                        if (estaAutenticado) {
-                            salida.writeUTF("Chavalon estas en una sesión activa no puedes iniciar sesión con otra cuenta.");
-                            continue;
-                        }
-                        String usuario = comando[1];
-                        String pass = comando[2];
-                        if (ServidorMulti.usuariosRegistrados.containsKey(usuario) && ServidorMulti.usuariosRegistrados.get(usuario).equals(pass)) {
-                            this.nombreUsuario = usuario;
-                            this.estaAutenticado = true;
-                            salida.writeUTF("Bienvenido de nuevo shavalon, " + this.nombreUsuario);
-                        } else {
-                            salida.writeUTF("Error: Usuario o contraseña incorrectos.");
-                        }
-                        continue;
-                    }
-                    salida.writeUTF("Comando en formato incorrecto.");
-                    continue;
-                }
-                if (!estaAutenticado && mensajesEnviados >= 3) {
-                    salida.writeUTF("Llegaste al Límite de mensajes shavalon. Por favor, regístrate o inicia sesión para continuar enviando mensajes.");
-                    continue;
-                }
-                String remitente = estaAutenticado ? this.nombreUsuario : "Invitado #" + clienteId;
-                if (!estaAutenticado) {
-                    mensajesEnviados++;
-                }
-                if (mensaje.startsWith("@")){
-                    String [] partes = mensaje.split(" ", 2);
-                    if (partes.length < 2) {
-                        salida.writeUTF("Formato de mensaje privado incorrecto. Usa @usuario1,usuario2 mensaje");
-                        continue;
-                    }
-                    String aQuienes = partes[0].substring(1);
-                    String[] nombresDestinatarios = aQuienes.split(",");
-                    String mensajePrivado = "(Privado) " + remitente + ": " + partes[1];
-
-                    for (String destNombre : nombresDestinatarios) {
-                        boolean encontrado = false;
-                        for (UnCliente clienteDestino : ServidorMulti.clientes.values()) {
-                            if (destNombre.trim().equals(clienteDestino.nombreUsuario) || destNombre.trim().equals(clienteDestino.clienteId)) {
-                                clienteDestino.salida.writeUTF(mensajePrivado);
-                                encontrado = true;
-                                break;
-                            }
-                        }
-                        if (!encontrado) {
-                            salida.writeUTF("El usuario '" + destNombre.trim() + "' no fue encontrado o no está conectado.");
-                        }
-                    }
+        try {
+            enviarMensajesDeBienvenida();
+            String mensajeEntrante;
+            while ((mensajeEntrante = entrada.readUTF()) != null) {
+                if (mensajeEntrante.startsWith("/")) {
+                    procesarComando(mensajeEntrante);
                 } else {
-                    String mensajeConRemitente = remitente + ": " + mensaje;
-                    for(UnCliente cliente : ServidorMulti.clientes.values()){
-                        if (!this.clienteId.equals(cliente.clienteId)) {
-                            cliente.salida.writeUTF(mensajeConRemitente);
-                        }
-                    }
+                    procesarMensajeChat(mensajeEntrante);
                 }
-            }catch (IOException ex){
-                System.out.println("Shavalon #" + clienteId + " se ha desconectado.");
-                ServidorMulti.clientes.remove(this.clienteId);
-                break;
             }
+        } catch (IOException ex) {
+            System.out.println("El cliente " + getNombreRemitente() + " ha perdido la conexión.");
+        } finally {
+            ServidorMulti.removerCliente(this);
         }
     }
     private void registrar(String usuario, String pass) throws IOException {
