@@ -4,16 +4,17 @@ import java.io.*;
 import java.net.Socket;
 
 public class UnCliente implements Runnable {
-    final DataOutputStream salida;
-    final DataInputStream entrada;
-    final String clienteId;
+    private final String clienteId;
+    private String nombreUsuario = null;
     private int mensajesEnviados = 0;
     private boolean estaAutenticado = false;
-    private String nombreUsuario = null;
-    UnCliente(Socket s, String clienteId) throws IOException{
+    private final DataOutputStream salida;
+    private final DataInputStream entrada;
+
+    public UnCliente(Socket s, String clienteId) throws IOException {
         this.clienteId = clienteId;
-        salida = new DataOutputStream(s.getOutputStream());
-        entrada = new DataInputStream(s.getInputStream());
+        this.salida = new DataOutputStream(s.getOutputStream());
+        this.entrada = new DataInputStream(s.getInputStream());
     }
 
     @Override

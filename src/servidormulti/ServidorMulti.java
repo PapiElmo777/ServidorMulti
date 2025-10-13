@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Scanner;
 
+
 public class ServidorMulti {
     static HashMap<String,UnCliente> clientes = new HashMap<String,UnCliente>();
     static HashMap<String, String> usuariosRegistrados = new HashMap<>();
