@@ -26,6 +26,7 @@ public class ServidorMulti {
             contador++;
         }
     }
+
     public static void cargarUsuarios() {
         try (Scanner scanner = new Scanner(new File(ARCHIVO_USUARIOS))) {
             System.out.println("Cargando usuarios desde el archivo...");
@@ -48,5 +49,16 @@ public class ServidorMulti {
         } catch (IOException e) {
             System.err.println("Error al escribir en el archivo de usuarios: " + e.getMessage());
         }
+    }
+    public static boolean autenticarUsuario(String usuario, String password) {
+        return usuariosRegistrados.containsKey(usuario) && usuariosRegistrados.get(usuario).equals(password);
+    }
+
+    public static boolean registrarUsuario(String usuario, String password) {
+        if (usuariosRegistrados.putIfAbsent(usuario, password) == null) {
+            guardarUsuarioEnArchivo(usuario, password);
+            return true;
+        }
+        return false;
     }
 }
