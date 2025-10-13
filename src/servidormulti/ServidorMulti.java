@@ -13,20 +13,23 @@ public class ServidorMulti {
     private static final Map<String, String> usuariosRegistrados = new ConcurrentHashMap<>();
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
-    public static void main(String[] args) throws IOException{
-        cargarUsuarios();
+    public static void main(String[] args) throws IOException {
         ServerSocket servidorSocket = new ServerSocket(8080);
+        System.out.println("Servidor refactorizado iniciado en el puerto 8080.");
         int contador = 0;
-        while(true){
+
+        while (true) {
             Socket s = servidorSocket.accept();
+            System.out.println("Se conecto el chavalo: #" + contador + "( Como invitado)");
             UnCliente unCliente = new UnCliente(s, Integer.toString(contador));
+            agregarCliente(unCliente);
+
             Thread hilo = new Thread(unCliente);
-            clientes.put(Integer.toString(contador), unCliente);
             hilo.start();
-            System.out.println("Se conecto el chavalo: #" +  contador + "( Como invitado)");
             contador++;
         }
     }
+
 
     public static void cargarUsuarios() {
         try (Scanner scanner = new Scanner(new File(ARCHIVO_USUARIOS))) {
