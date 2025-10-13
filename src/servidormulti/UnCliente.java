@@ -160,6 +160,18 @@ public class UnCliente implements Runnable {
             enviarMensaje("Error: Usuario o contraseña incorrectos.");
         }
     }
+    private void logout() throws IOException {
+        if (!estaAutenticado) {
+            enviarMensaje("No has iniciado sesión, no puedes usar /logout.");
+            return;
+        }
+        String usuarioAnterior = this.nombreUsuario;
+        this.estaAutenticado = false;
+        this.nombreUsuario = null;
+        this.mensajesEnviados = 0;
+        enviarMensaje("Adios '" + usuarioAnterior + "'. Ahora eres un invitado.");
+        ServidorMulti.enviarMensajePublico(this, ">> El usuario '" + usuarioAnterior + "' ha cerrado sesión. <<", true);
+    }
 
     public String getClienteId() { return clienteId; }
     public String getNombreUsuario() { return nombreUsuario; }
