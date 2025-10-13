@@ -3,13 +3,14 @@ package servidormulti;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ServidorMulti {
-    static HashMap<String,UnCliente> clientes = new HashMap<String,UnCliente>();
-    static HashMap<String, String> usuariosRegistrados = new HashMap<>();
+    private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
+    private static final Map<String, String> usuariosRegistrados = new ConcurrentHashMap<>();
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public static void main(String[] args) throws IOException{
@@ -60,5 +61,26 @@ public class ServidorMulti {
             return true;
         }
         return false;
+    }
+    public static void agregarCliente(UnCliente cliente) {
+        clientesConectados.put(cliente.getClienteId(), cliente);
+    }
+
+    public static void removerCliente(UnCliente cliente) {
+        clientesConectados.remove(cliente.getClienteId());
+        enviarMensajePublico(cliente, ">> El usuario '" + cliente.getNombreRemitente() + "' se ha desconectado. <<", true);
+    }
+
+    public static void enviarMensajePublico(UnCliente remitente, String mensaje, boolean esNotificacion) {
+        String mensajeCompleto = esNotificacion ? mensaje : remitente.getNombreRemitente() + ": " + mensaje;
+        for (UnCliente cliente : clientesConectados.values()) {
+            if (!cliente.equals(remitente)) {
+                try {
+                    cliente.enviarMensaje(mensajeCompleto);
+                } catch (IOException e) {
+                    System.err.println("Error al enviar mensaje a " + cliente.getClienteId());
+                }
+            }
+        }
     }
 }

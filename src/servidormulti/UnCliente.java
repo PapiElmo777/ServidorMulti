@@ -134,4 +134,12 @@ public class UnCliente implements Runnable {
             }
         }
     }
+    public String getClienteId() { return clienteId; }
+    public String getNombreUsuario() { return nombreUsuario; }
+    public String getNombreRemitente() {
+        return estaAutenticado ? nombreUsuario : "Invitado #" + clienteId;
+    }
+    public void enviarMensaje(String mensaje) throws IOException {
+        salida.writeUTF(mensaje);
+    }
 }
