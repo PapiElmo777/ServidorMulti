@@ -6,15 +6,14 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.sql.*;
 
 
 public class ServidorMulti {
     private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-    private static final Map<String, String> usuariosRegistrados = new ConcurrentHashMap<>();
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public static void main(String[] args) throws IOException {
-        cargarUsuarios();
         ServerSocket servidorSocket = new ServerSocket(8080);
         System.out.println("Servidor refactorizado iniciado en el puerto 8080.");
         int contador = 0;
@@ -31,21 +30,11 @@ public class ServidorMulti {
         }
     }
 
-
-    public static void cargarUsuarios() {
-        try (Scanner scanner = new Scanner(new File(ARCHIVO_USUARIOS))) {
-            System.out.println("Cargando usuarios desde el archivo...");
-            while (scanner.hasNextLine()) {
-                String linea = scanner.nextLine();
-                String[] partes = linea.split(":", 2);
-                if (partes.length == 2) {
-                    usuariosRegistrados.put(partes[0], partes[1]);
-                }
-            }
-            System.out.println(usuariosRegistrados.size() + " usuarios cargados.");
-        } catch (FileNotFoundException e) {
-            System.out.println("Archivo de usuarios no encontrado. Se creará uno nuevo al registrar el primer usuario.");
-        }
+    private static Connection conexionBD() throws SQLException {
+        String url = "jdbc:mysql://localhost:3306/usuarios?serverTimezone=UTC";
+        String user = "root";
+        String password = "AE231505";
+        return DriverManager.getConnection(url, user, password);
     }
     public static synchronized void guardarUsuarioEnArchivo(String usuario, String password) {
         try (PrintWriter out = new PrintWriter(new FileWriter(ARCHIVO_USUARIOS, true))) {
