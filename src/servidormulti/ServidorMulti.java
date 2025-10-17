@@ -45,7 +45,21 @@ public class ServidorMulti {
         }
     }
     public static boolean autenticarUsuario(String usuario, String password) {
-        return usuariosRegistrados.containsKey(usuario) && usuariosRegistrados.get(usuario).equals(password);
+        String sql = "SELECT password FROM usuarios WHERE username = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, usuario);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String storedPassword = rs.getString("password");
+                return storedPassword.equals(password);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al autenticar usuario: " + e.getMessage());
+        }
+        return false;
     }
 
     public static boolean registrarUsuario(String usuario, String password) {
