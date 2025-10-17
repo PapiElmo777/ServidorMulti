@@ -30,7 +30,7 @@ public class ServidorMulti {
     }
 
     private static Connection conexionBD() throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/usuarios?serverTimezone=UTC";
+        String url = "jdbc:mysql://localhost:3306/usuarios?serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String user = "root";
         String password = "AE231505";
         return DriverManager.getConnection(url, user, password);
