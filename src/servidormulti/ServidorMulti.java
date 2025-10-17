@@ -1,12 +1,11 @@
 package servidormulti;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
 import java.sql.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ServidorMulti {
@@ -15,12 +14,12 @@ public class ServidorMulti {
 
     public static void main(String[] args) throws IOException {
         ServerSocket servidorSocket = new ServerSocket(8080);
-        System.out.println("Servidor refactorizado iniciado en el puerto 8080.");
+        System.out.println("Servidor iniciado en el puerto 8080 y conectado a MySQL.");
         int contador = 0;
 
         while (true) {
             Socket s = servidorSocket.accept();
-            System.out.println("Se conecto el chavalo: #" + contador + "( Como invitado)");
+            System.out.println("Se conectó un nuevo cliente: #" + contador);
             UnCliente unCliente = new UnCliente(s, Integer.toString(contador));
             agregarCliente(unCliente);
 
@@ -55,35 +54,30 @@ public class ServidorMulti {
     }
 
     public static boolean registrarUsuario(String usuario, String password) {
-        String checkUserSql = "SELECT id FROM usuarios WHERE username = ?";
+        String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
         try (Connection conn = conexionBD();
-             PreparedStatement checkStmt = conn.prepareStatement(checkUserSql)) {
-
-            checkStmt.setString(1, usuario);
-            ResultSet rs = checkStmt.executeQuery();
-            if (rs.next()) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            if (usuarioYaExiste(conn, usuario)) {
                 System.out.println("Intento de registrar un usuario que ya existe: " + usuario);
                 return false;
             }
-
-        } catch (SQLException e) {
-            System.err.println("Error al verificar si el usuario existe: " + e.getMessage());
-            return false;
-        }
-
-        String insertSql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
-        try (Connection conn = conexionBD();
-             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-
-            insertStmt.setString(1, usuario);
-            insertStmt.setString(2, password);
-            insertStmt.executeUpdate();
-            System.out.println("Usuario registrado exitosamente: " + usuario);
+            pstmt.setString(1, usuario);
+            pstmt.setString(2, password);
+            pstmt.executeUpdate();
+            System.out.println("Usuario registrado exitosamente en la BD: " + usuario);
             return true;
 
         } catch (SQLException e) {
             System.err.println("Error al registrar nuevo usuario: " + e.getMessage());
             return false;
+        }
+    }
+    private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
+        String sql = "SELECT id FROM usuarios WHERE username = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, usuario);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
         }
     }
     public static void agregarCliente(UnCliente cliente) {
