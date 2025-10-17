@@ -13,6 +13,7 @@ public class ServidorMulti {
     private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
 
     public static void main(String[] args) throws IOException {
+        inicializarBaseDeDatos();
         ServerSocket servidorSocket = new ServerSocket(8080);
         System.out.println("Servidor iniciado en el puerto 8080 y conectado a MySQL.");
         int contador = 0;
@@ -32,7 +33,32 @@ public class ServidorMulti {
     private static Connection conexionBD() throws SQLException {
         return DriverManager.getConnection(URL_SQLITE);
     }
+    private static void inicializarBaseDeDatos() {
+        String sqlCreateTable = "CREATE TABLE IF NOT EXISTS usuarios (" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "    username VARCHAR(15) NOT NULL UNIQUE," +
+                "    password VARCHAR(15) NOT NULL" +
+                ");";
 
+        try {
+            Class.forName("org.sqlite.JDBC");
+            try (Connection conn = conexionBD();
+                 Statement stmt = conn.createStatement()) {
+
+                stmt.execute(sqlCreateTable);
+                System.out.println("Base de datos SQLite y tabla 'usuarios' listas.");
+
+            } catch (SQLException e) {
+                System.err.println("No se pudo inicializar la base de datos shavalon: " + e.getMessage());
+                System.exit(1);
+            }
+
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error no se encontró la clase del driver de SQLite.");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
     public static boolean autenticarUsuario(String usuario, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
