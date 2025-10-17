@@ -11,7 +11,7 @@ import java.sql.*;
 
 public class ServidorMulti {
     private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-    private static final String ARCHIVO_USUARIOS = "usuarios.txt";
+
 
     public static void main(String[] args) throws IOException {
         ServerSocket servidorSocket = new ServerSocket(8080);
@@ -36,14 +36,6 @@ public class ServidorMulti {
         String password = "AE231505";
         return DriverManager.getConnection(url, user, password);
     }
-    public static synchronized void guardarUsuarioEnArchivo(String usuario, String password) {
-        try (PrintWriter out = new PrintWriter(new FileWriter(ARCHIVO_USUARIOS, true))) {
-            out.println(usuario + ":" + password);
-            System.out.println("Nuevo usuario '" + usuario + "' guardado en el archivo.");
-        } catch (IOException e) {
-            System.err.println("Error al escribir en el archivo de usuarios: " + e.getMessage());
-        }
-    }
     public static boolean autenticarUsuario(String usuario, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
@@ -63,11 +55,36 @@ public class ServidorMulti {
     }
 
     public static boolean registrarUsuario(String usuario, String password) {
-        if (usuariosRegistrados.putIfAbsent(usuario, password) == null) {
-            guardarUsuarioEnArchivo(usuario, password);
-            return true;
+        String checkUserSql = "SELECT id FROM usuarios WHERE username = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement checkStmt = conn.prepareStatement(checkUserSql)) {
+
+            checkStmt.setString(1, usuario);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("Intento de registrar un usuario que ya existe: " + usuario);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al verificar si el usuario existe: " + e.getMessage());
+            return false;
         }
-        return false;
+
+        String insertSql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
+        try (Connection conn = conexionBD();
+             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+
+            insertStmt.setString(1, usuario);
+            insertStmt.setString(2, password);
+            insertStmt.executeUpdate();
+            System.out.println("Usuario registrado exitosamente: " + usuario);
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("Error al registrar nuevo usuario: " + e.getMessage());
+            return false;
+        }
     }
     public static void agregarCliente(UnCliente cliente) {
         clientesConectados.put(cliente.getClienteId(), cliente);
