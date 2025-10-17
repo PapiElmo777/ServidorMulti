@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServidorMulti {
     private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-
+    private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
 
     public static void main(String[] args) throws IOException {
         ServerSocket servidorSocket = new ServerSocket(8080);
@@ -30,11 +30,9 @@ public class ServidorMulti {
     }
 
     private static Connection conexionBD() throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/usuarios?serverTimezone=UTC&allowPublicKeyRetrieval=true";
-        String user = "root";
-        String password = "AE231505";
-        return DriverManager.getConnection(url, user, password);
+        return DriverManager.getConnection(URL_SQLITE);
     }
+
     public static boolean autenticarUsuario(String usuario, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
