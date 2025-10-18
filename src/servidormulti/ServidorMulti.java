@@ -177,6 +177,33 @@ public class ServidorMulti {
             return "[Error] No se pudo procesar el bloqueo.";
         }
     }
+    public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
+        if (!existeUsuario(usernameDesbloqueado)) {
+            return "[Error] El usuario '" + usernameDesbloqueado + "' no existe.";
+        }
+
+        int idBloqueado = obtenerIdUsuario(usernameDesbloqueado);
+        String sql = "DELETE FROM bloqueados WHERE bloqueador_id = ? AND bloqueado_id = ?";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, idBloqueador);
+            pstmt.setInt(2, idBloqueado);
+
+            int filasAfectadas = pstmt.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                return "[Éxito] Has desbloqueado a '" + usernameDesbloqueado + "'.";
+            } else {
+                return "[Info] No tenías bloqueado a '" + usernameDesbloqueado + "'.";
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "[Error] No se pudo procesar el desbloqueo.";
+        }
+    }
     private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
