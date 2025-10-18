@@ -144,7 +144,39 @@ public class ServidorMulti {
             return false;
         }
     }
+    public String bloquearUsuario(int idBloqueador, String usernameBloqueado) {
+        if (!existeUsuario(usernameBloqueado)) {
+            return "Shavalon el usuario '" + usernameBloqueado + "' no existe.";
+        }
 
+        int idBloqueado = obtenerIdUsuario(usernameBloqueado);
+        if (idBloqueador == idBloqueado) {
+            return "Shavalon no puedes bloquearte a ti mismo.";
+        }
+        String checkSql = "SELECT 1 FROM bloqueados WHERE bloqueador_id = ? AND bloqueado_id = ?";
+        String insertSql = "INSERT INTO bloqueados(bloqueador_id, bloqueado_id) VALUES(?, ?)";
+
+        try (Connection conn = conexionBD()) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, idBloqueador);
+                checkStmt.setInt(2, idBloqueado);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next()) {
+                    return "[Info] Ya tenías bloqueado a '" + usernameBloqueado + "'.";
+                }
+            }
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                insertStmt.setInt(1, idBloqueador);
+                insertStmt.setInt(2, idBloqueado);
+                insertStmt.executeUpdate();
+                return "[Éxito] Has bloqueado a '" + usernameBloqueado + "'.";
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "[Error] No se pudo procesar el bloqueo.";
+        }
+    }
     private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
