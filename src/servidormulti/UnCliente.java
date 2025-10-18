@@ -13,17 +13,22 @@ public class UnCliente implements Runnable {
     private BufferedReader in;
     private String username;
     private int idUsuario;
-
+    private String guestUsername;
+    private int mensajesComoInvitado = 0;
     public UnCliente(Socket socket, ServidorMulti servidor) {
         this.socket = socket;
         this.servidor = servidor;
+        this.guestUsername = "Invitado-" + socket.getPort();
     }
     public String getUsername() {
-        return username;
+        return (this.username != null) ? this.username : this.guestUsername;
     }
 
     public int getIdUsuario() {
         return idUsuario;
+    }
+    public boolean isLogueado() {
+        return this.username != null;
     }
 
     @Override
