@@ -1,24 +1,26 @@
 package clientemulti;
-import java.io.DataInputStream;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
-public class ParaRecibir implements Runnable{
-    final DataInputStream entrada;
+
+public class ParaRecibir implements Runnable {
+    final BufferedReader entrada;
+
     public ParaRecibir(Socket s) throws IOException {
-        entrada = new DataInputStream(s.getInputStream());
+        entrada = new BufferedReader(new InputStreamReader(s.getInputStream()));
     }
 
     @Override
     public void run() {
         String mensaje;
-        mensaje = "";
-        while(true){
-            try {
-                mensaje = entrada.readUTF();
+        try {
+            while ((mensaje = entrada.readLine()) != null) {
                 System.out.println(mensaje);
-            } catch (IOException ex) {
             }
+        } catch (IOException ex) {
+            System.out.println("Desconectado del servidor.");
         }
     }
-
 }
