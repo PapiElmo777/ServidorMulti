@@ -66,7 +66,7 @@ public class ServidorMulti {
             }
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Error CRÍTICO: No se encontró la clase del driver de SQLite.");
+            System.err.println("No se encontró la clase del driver de SQLite.");
             e.printStackTrace();
             System.exit(1);
         }
