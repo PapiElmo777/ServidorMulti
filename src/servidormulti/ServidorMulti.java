@@ -260,8 +260,13 @@ public class ServidorMulti {
     }
 
     public void removerCliente(UnCliente cliente) {
-        System.out.println("Cliente " + cliente.getUsername() + " desconectado.");
-        if (cliente.getUsername() != null) {
+        boolean removido = clientesConectados.remove(cliente);
+
+        if (!removido) {
+            System.err.println("Advertencia: Se intentó remover un cliente que no estaba en la lista.");
+        }
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size());
+        if (cliente.isLogueado()) {
             difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
         }
     }
