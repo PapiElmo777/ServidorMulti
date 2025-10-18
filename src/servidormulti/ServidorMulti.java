@@ -165,16 +165,17 @@ public class ServidorMulti {
                 insertStmt.setInt(1, idBloqueador);
                 insertStmt.setInt(2, idBloqueado);
                 insertStmt.executeUpdate();
-                return "Has bloqueado a '" + usernameBloqueado + "'.";
+                return "Has bloqueado de tu vida a '" + usernameBloqueado + "'.";
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
             return "Shavalon no se pudo procesar el bloqueo.";
         }
-    }    public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
+    }
+    public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
         if (!existeUsuario(usernameDesbloqueado)) {
-            return "[Error] El usuario '" + usernameDesbloqueado + "' no existe.";
+            return "El usuario '" + usernameDesbloqueado + "' no existe.";
         }
 
         int idBloqueado = obtenerIdUsuario(usernameDesbloqueado);
@@ -189,9 +190,9 @@ public class ServidorMulti {
             int filasAfectadas = pstmt.executeUpdate();
 
             if (filasAfectadas > 0) {
-                return "[Éxito] Has desbloqueado a '" + usernameDesbloqueado + "'.";
+                return "Has perdonado a '" + usernameDesbloqueado + "'.";
             } else {
-                return "[Info] No tenías bloqueado a '" + usernameDesbloqueado + "'.";
+                return "No estabas enojado con '" + usernameDesbloqueado + "'.";
             }
 
         } catch (SQLException e) {
