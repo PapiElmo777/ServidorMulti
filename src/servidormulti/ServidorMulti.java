@@ -209,7 +209,7 @@ public class ServidorMulti {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return "[Error] No se pudo procesar el desbloqueo.";
+            return "No se pudo procesar el desbloqueo.";
         }
     }
 
