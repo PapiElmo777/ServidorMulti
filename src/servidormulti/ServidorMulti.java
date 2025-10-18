@@ -216,17 +216,16 @@ public class ServidorMulti {
     }
     public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
         if (!existeUsuario(usernameDestinatario)) {
-            remitente.out.println("[Error] El usuario '" + usernameDestinatario + "' no existe.");
+            remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no existe.");
             return;
         }
 
         int idDestinatario = obtenerIdUsuario(usernameDestinatario);
 
         if (estanBloqueados(remitente.getIdUsuario(), idDestinatario)) {
-            remitente.out.println("[Error] No puedes enviar mensajes a '" + usernameDestinatario + "' (relación de bloqueo).");
+            remitente.out.println("Shavalon no puedes enviar mensajes a '" + usernameDestinatario + "' (Estan enojados).");
             return;
         }
-
         UnCliente clienteDestinatario = null;
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
@@ -236,6 +235,13 @@ public class ServidorMulti {
                 }
             }
         }
+        if (clienteDestinatario != null) {
+            clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
+            remitente.out.println("[Privado para " + usernameDestinatario + "]: " + mensaje);
+        } else {
+            remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
+        }
+    }
 
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
