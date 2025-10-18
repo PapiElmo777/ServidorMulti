@@ -9,17 +9,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ServidorMulti {
-    private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-    private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
+    private final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
+    private final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
 
     public static void main(String[] args) {
+        ServidorMulti servidor = new ServidorMulti();
+        servidor.iniciarServidor();
+
+    }
+    public void iniciarServidor() {
         inicializarBaseDeDatos();
+
         System.out.println("Servidor iniciado en el puerto 8080 y conectado a SQLite.");
 
         try (ServerSocket serverSocket = new ServerSocket(8080)) {
             while (true) {
                 Socket socket = serverSocket.accept();
-                UnCliente nuevoCliente = new UnCliente(socket, new ServidorMulti().toString());
+                UnCliente nuevoCliente = new UnCliente(socket, this);
                 clientesConectados.add(nuevoCliente);
                 new Thread(nuevoCliente).start();
             }
