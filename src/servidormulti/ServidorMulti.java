@@ -12,21 +12,19 @@ public class ServidorMulti {
     private static final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
     private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         inicializarBaseDeDatos();
-        ServerSocket servidorSocket = new ServerSocket(8080);
         System.out.println("Servidor iniciado en el puerto 8080 y conectado a SQLite.");
-        int contador = 0;
 
-        while (true) {
-            Socket s = servidorSocket.accept();
-            System.out.println("Se conectó un nuevo cliente: #" + contador);
-            UnCliente unCliente = new UnCliente(s, Integer.toString(contador));
-            agregarCliente(unCliente);
-
-            Thread hilo = new Thread(unCliente);
-            hilo.start();
-            contador++;
+        try (ServerSocket serverSocket = new ServerSocket(8080)) {
+            while (true) {
+                Socket socket = serverSocket.accept();
+                UnCliente nuevoCliente = new UnCliente(socket, new ServidorMulti().toString());
+                clientesConectados.add(nuevoCliente);
+                new Thread(nuevoCliente).start();
+            }
+        } catch (IOException e) {
+            System.err.println("Error en el servidor: " + e.getMessage());
         }
     }
 
