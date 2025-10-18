@@ -1,21 +1,27 @@
 package servidormulti;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.*;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ServidorMulti {
-    private final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-    private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
+
+    private final List<UnCliente> clientesConectados = Collections.synchronizedList(new ArrayList<>());
+    private static final String URL_BD = "jdbc:sqlite:usuarios.db";
 
     public static void main(String[] args) {
         ServidorMulti servidor = new ServidorMulti();
         servidor.iniciarServidor();
-
     }
     public void iniciarServidor() {
         inicializarBaseDeDatos();
@@ -34,10 +40,7 @@ public class ServidorMulti {
         }
     }
 
-    private static Connection conexionBD() throws SQLException {
-        return DriverManager.getConnection(URL_SQLITE);
-    }
-
+    // Método ESTÁTICO (se llama 1 vez)
     private static void inicializarBaseDeDatos() {
         String sqlCreateTableUsuarios = "CREATE TABLE IF NOT EXISTS usuarios (" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -54,7 +57,8 @@ public class ServidorMulti {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            try (Connection conn = conexionBD();
+
+            try (Connection conn = conexionBD(); // Llama al método estático
                  Statement stmt = conn.createStatement()) {
                 stmt.execute(sqlCreateTableUsuarios);
                 stmt.execute(sqlCreateTableBloqueados);
@@ -66,10 +70,14 @@ public class ServidorMulti {
             }
 
         } catch (ClassNotFoundException e) {
-            System.err.println("No se encontró la clase del driver de SQLite.");
+            System.err.println("Error CRÍTICO: No se encontró la clase del driver de SQLite.");
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private static Connection conexionBD() throws SQLException {
+        return DriverManager.getConnection(URL_BD);
     }
 
     public boolean autenticarUsuario(String username, String password) {
@@ -209,7 +217,7 @@ public class ServidorMulti {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return "No se pudo procesar el desbloqueo.";
+            return "[Error] No se pudo procesar el desbloqueo.";
         }
     }
 
@@ -221,12 +229,6 @@ public class ServidorMulti {
                 }
             }
         }
-    }
-
-    public void removerCliente(UnCliente cliente) {
-        clientesConectados.remove(cliente);
-        System.out.println("Cliente " + cliente.getUsername() + " desconectado.");
-        difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
     }
 
     public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
@@ -244,7 +246,6 @@ public class ServidorMulti {
 
         UnCliente clienteDestinatario = null;
         synchronized (clientesConectados) {
-            // .values() no es necesario
             for (UnCliente cliente : clientesConectados) {
                 if (cliente.getUsername() != null && cliente.getUsername().equals(usernameDestinatario)) {
                     clienteDestinatario = cliente;
@@ -260,6 +261,14 @@ public class ServidorMulti {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
     }
+
+    public void removerCliente(UnCliente cliente) {
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado.");
+        if (cliente.getUsername() != null) {
+            difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
+        }
+    }
+
     public String obtenerListaUsuarios(String usernameExcluir) {
         List<String> usuarios = new ArrayList<>();
         String sql = "SELECT username FROM usuarios WHERE username != ?";
@@ -277,9 +286,8 @@ public class ServidorMulti {
         }
 
         if (usuarios.isEmpty()) {
-            return "Shavalon no hay otros usuarios registrados.";
+            return "[Info] No hay otros usuarios registrados.";
         }
         return "[Usuarios] " + String.join(", ", usuarios);
     }
-}
 }
