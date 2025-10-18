@@ -33,6 +33,7 @@ public class ServidorMulti {
     private static Connection conexionBD() throws SQLException {
         return DriverManager.getConnection(URL_SQLITE);
     }
+
     private static void inicializarBaseDeDatos() {
         String sqlCreateTableUsuarios = "CREATE TABLE IF NOT EXISTS usuarios (" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -66,6 +67,7 @@ public class ServidorMulti {
             System.exit(1);
         }
     }
+
     public boolean autenticarUsuario(String username, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
@@ -83,6 +85,7 @@ public class ServidorMulti {
             return false;
         }
     }
+
     public boolean registrarUsuario(String username, String password) {
         String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
         try (Connection conn = conexionBD();
@@ -100,6 +103,7 @@ public class ServidorMulti {
             return false;
         }
     }
+
     public int obtenerIdUsuario(String username) {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
@@ -116,9 +120,11 @@ public class ServidorMulti {
             return -1;
         }
     }
+
     public boolean existeUsuario(String username) {
         return obtenerIdUsuario(username) != -1;
     }
+
     public boolean estanBloqueados(int idUsuarioA, int idUsuarioB) {
         String sql = "SELECT 1 FROM bloqueados WHERE " +
                 "(bloqueador_id = ? AND bloqueado_id = ?) OR " +
@@ -140,6 +146,7 @@ public class ServidorMulti {
             return false;
         }
     }
+
     public String bloquearUsuario(int idBloqueador, String usernameBloqueado) {
         if (!existeUsuario(usernameBloqueado)) {
             return "Shavalon el usuario '" + usernameBloqueado + "' no existe.";
@@ -173,6 +180,7 @@ public class ServidorMulti {
             return "Shavalon no se pudo procesar el bloqueo.";
         }
     }
+
     public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
         if (!existeUsuario(usernameDesbloqueado)) {
             return "El usuario '" + usernameDesbloqueado + "' no existe.";
@@ -200,6 +208,7 @@ public class ServidorMulti {
             return "[Error] No se pudo procesar el desbloqueo.";
         }
     }
+
     public void difundirMensaje(String mensaje, UnCliente remitente) {
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
@@ -209,11 +218,13 @@ public class ServidorMulti {
             }
         }
     }
+
     public void removerCliente(UnCliente cliente) {
         clientesConectados.remove(cliente);
         System.out.println("Cliente " + cliente.getUsername() + " desconectado.");
         difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
     }
+
     public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
         if (!existeUsuario(usernameDestinatario)) {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no existe.");
@@ -241,7 +252,7 @@ public class ServidorMulti {
         } else {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
-    }
+
 
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
@@ -249,13 +260,5 @@ public class ServidorMulti {
         } else {
             remitente.out.println("[Info] El usuario '" + usernameDestinatario + "' no está conectado.");
         }
-    }
-    public static boolean cuentaYaEnUso(String usuario) {
-        for (UnCliente cliente : clientesConectados.values()) {
-            if (java.util.Objects.equals(usuario, cliente.getNombreUsuario())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
