@@ -209,9 +209,10 @@ public class ServidorMulti {
             }
         }
     }
-    public static void removerCliente(UnCliente cliente) {
-        clientesConectados.remove(cliente.getClienteId());
-        enviarMensajePublico(cliente, ">> El usuario '" + cliente.getNombreRemitente() + "' se ha desconectado. <<", true);
+    public void removerCliente(UnCliente cliente) {
+        clientesConectados.remove(cliente);
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado.");
+        difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
     }
     public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
         if (!existeUsuario(usernameDestinatario)) {
