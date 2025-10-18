@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServidorMulti {
     private final Map<String, UnCliente> clientesConectados = new ConcurrentHashMap<>();
-    private final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
+    private static final String URL_SQLITE = "jdbc:sqlite:usuarios.db";
 
     public static void main(String[] args) {
         ServidorMulti servidor = new ServidorMulti();
@@ -241,28 +241,45 @@ public class ServidorMulti {
             remitente.out.println("Shavalon no puedes enviar mensajes a '" + usernameDestinatario + "' (Estan enojados).");
             return;
         }
+
         UnCliente clienteDestinatario = null;
         synchronized (clientesConectados) {
+            // .values() no es necesario
             for (UnCliente cliente : clientesConectados) {
-                if (cliente.getUsername().equals(usernameDestinatario)) {
+                if (cliente.getUsername() != null && cliente.getUsername().equals(usernameDestinatario)) {
                     clienteDestinatario = cliente;
                     break;
                 }
             }
         }
+
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
             remitente.out.println("[Privado para " + usernameDestinatario + "]: " + mensaje);
         } else {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
-
-
-        if (clienteDestinatario != null) {
-            clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
-            remitente.out.println("[Privado para " + usernameDestinatario + "]: " + mensaje);
-        } else {
-            remitente.out.println("[Info] El usuario '" + usernameDestinatario + "' no está conectado.");
-        }
     }
+    public String obtenerListaUsuarios(String usernameExcluir) {
+        List<String> usuarios = new ArrayList<>();
+        String sql = "SELECT username FROM usuarios WHERE username != ?";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, usernameExcluir);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                usuarios.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (usuarios.isEmpty()) {
+            return "Shavalon no hay otros usuarios registrados.";
+        }
+        return "[Usuarios] " + String.join(", ", usuarios);
+    }
+}
 }
