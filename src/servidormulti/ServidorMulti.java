@@ -1,7 +1,6 @@
 package servidormulti;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
@@ -39,8 +38,6 @@ public class ServidorMulti {
             System.err.println("Error en el servidor: " + e.getMessage());
         }
     }
-
-    // Método ESTÁTICO (se llama 1 vez)
     private static void inicializarBaseDeDatos() {
         String sqlCreateTableUsuarios = "CREATE TABLE IF NOT EXISTS usuarios (" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
