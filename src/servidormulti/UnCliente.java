@@ -37,12 +37,15 @@ public class UnCliente implements Runnable {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            out.println("Conectado al servidor. Usa /registrar <user> <pass> o /login <user> <pass>");
+            out.println("Conectado. Puedes enviar 3 mensajes como " + this.guestUsername);
+            out.println("Usa /registrar <user> <pass> o /login <user> <pass> para chatear sin límites.");
+
 
             String mensaje;
             while ((mensaje = in.readLine()) != null) {
 
-                if (username == null) {
+                if (!isLogueado()) {
+
                     if (mensaje.startsWith("/login ")) {
                         String[] partes = mensaje.split(" ", 3);
                         if (partes.length == 3) {
@@ -70,11 +73,22 @@ public class UnCliente implements Runnable {
                         } else {
                             out.println("Error: Formato incorrecto. Usa /registrar <user> <pass>");
                         }
-                    } else {
-                        out.println("Comando no reconocido. Debes usar /login o /registrar.");
+                    } else if (mensaje.startsWith("/")) {
+                        out.println("Comando no disponible para invitados. Debes usar /login o /registrar.");
                     }
-                }
-                else {
+                    else {
+                        if (mensajesComoInvitado < 3) {
+                            mensajesComoInvitado++;
+                            servidor.difundirMensaje(mensaje, this);
+                            out.println("[Mensaje " + mensajesComoInvitado + "/3 como " + this.guestUsername + "].");
+                        } else {
+                            out.println("Límite de 3 mensajes de invitado alcanzado.");
+                            out.println("Usa /registrar <user> <pass> o /login <user> <pass>");
+                        }
+                    }
+
+                } else {
+
                     if (mensaje.startsWith("/bloquear ")) {
                         String[] partes = mensaje.split(" ", 2);
                         if (partes.length == 2) {
@@ -112,20 +126,22 @@ public class UnCliente implements Runnable {
                     } else if (mensaje.equals("/adios")) {
                         break;
 
-                    } else {
+                    } else if (mensaje.startsWith("/")) {
+                        out.println("Comando no reconocido. Escribe /ayuda para ver la lista.");
+                    }
+                    else {
                         servidor.difundirMensaje(mensaje, this);
                     }
                 }
             }
         } catch (IOException e) {
+            System.err.println("Error de IO en UnCliente (" + getUsername() + "): " + e.getMessage());
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
             }
-            if (username != null) {
-                servidor.removerCliente(this);
-            }
+            servidor.removerCliente(this);
         }
     }
     private void enviarMenuAyuda() {
