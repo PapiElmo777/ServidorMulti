@@ -1,20 +1,29 @@
 package servidormulti;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class UnCliente implements Runnable {
-    private final String clienteId;
-    private String nombreUsuario = null;
-    private int mensajesEnviados = 0;
-    private boolean estaAutenticado = false;
-    private final DataOutputStream salida;
-    private final DataInputStream entrada;
+    private final Socket socket;
+    private final ServidorMulti servidor;
+    private PrintWriter out;
+    private BufferedReader in;
+    private String username;
+    private int idUsuario; 
 
-    public UnCliente(Socket s, String clienteId) throws IOException {
-        this.clienteId = clienteId;
-        this.salida = new DataOutputStream(s.getOutputStream());
-        this.entrada = new DataInputStream(s.getInputStream());
+    public UnCliente(Socket socket, ServidorMulti servidor) {
+        this.socket = socket;
+        this.servidor = servidor;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public int getIdUsuario() {
+        return idUsuario;
     }
 
     @Override
@@ -111,7 +120,7 @@ public class UnCliente implements Runnable {
                 enviarMensaje("Formato de mensaje privado incorrecto. Usa @usuario1,usuario2 mensaje");
                 return;
             }
-            ServidorMulti.enviarMensajePrivado(this, partes[0].substring(1), partes[1]);
+            ServidorMulti.enviarMensajePublico(this, partes[0].substring(1), partes[1]);
         } else {
             ServidorMulti.enviarMensajePublico(this, mensaje, false);
         }
