@@ -204,6 +204,15 @@ public class ServidorMulti {
             return "[Error] No se pudo procesar el desbloqueo.";
         }
     }
+    public void difundirMensaje(String mensaje, UnCliente remitente) {
+        synchronized (clientesConectados) {
+            for (UnCliente cliente : clientesConectados) {
+                if (!estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
+                    cliente.out.println(remitente.getUsername() + ": " + mensaje);
+                }
+            }
+        }
+    }
     private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
