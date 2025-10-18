@@ -83,22 +83,20 @@ public class ServidorMulti {
             return false;
         }
     }
-    public static boolean registrarUsuario(String usuario, String password) {
+    public boolean registrarUsuario(String username, String password) {
         String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            if (usuarioYaExiste(conn, usuario)) {
-                System.out.println("Intento de registrar un usuario que ya existe: " + usuario);
-                return false;
-            }
-            pstmt.setString(1, usuario);
+
+            pstmt.setString(1, username);
             pstmt.setString(2, password);
             pstmt.executeUpdate();
-            System.out.println("Usuario registrado exitosamente en la BD: " + usuario);
             return true;
-
         } catch (SQLException e) {
-            System.err.println("Error al registrar nuevo usuario: " + e.getMessage());
+            if (e.getErrorCode() == 19) {
+                return false;
+            }
+            e.printStackTrace();
             return false;
         }
     }
