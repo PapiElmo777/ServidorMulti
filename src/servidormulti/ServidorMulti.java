@@ -65,22 +65,23 @@ public class ServidorMulti {
             e.printStackTrace();
             System.exit(1);
         }
-    }    public static boolean autenticarUsuario(String usuario, String password) {
+    }
+    public boolean autenticarUsuario(String username, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, usuario);
+            pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                String storedPassword = rs.getString("password");
-                return storedPassword.equals(password);
+                return rs.getString("password").equals(password);
             }
+            return false;
         } catch (SQLException e) {
-            System.err.println("Error al autenticar usuario: " + e.getMessage());
+            System.err.println("Error al autenticar: " + e.getMessage());
+            return false;
         }
-        return false;
     }
     public static boolean registrarUsuario(String usuario, String password) {
         String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
