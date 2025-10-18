@@ -123,6 +123,28 @@ public class ServidorMulti {
     public boolean existeUsuario(String username) {
         return obtenerIdUsuario(username) != -1;
     }
+    public boolean estanBloqueados(int idUsuarioA, int idUsuarioB) {
+        String sql = "SELECT 1 FROM bloqueados WHERE " +
+                "(bloqueador_id = ? AND bloqueado_id = ?) OR " +
+                "(bloqueador_id = ? AND bloqueado_id = ?)";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, idUsuarioA);
+            pstmt.setInt(2, idUsuarioB);
+            pstmt.setInt(3, idUsuarioB);
+            pstmt.setInt(4, idUsuarioA);
+
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
