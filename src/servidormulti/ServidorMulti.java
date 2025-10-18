@@ -15,7 +15,7 @@ public class ServidorMulti {
     public static void main(String[] args) throws IOException {
         inicializarBaseDeDatos();
         ServerSocket servidorSocket = new ServerSocket(8080);
-        System.out.println("Servidor iniciado en el puerto 8080 y conectado a MySQL.");
+        System.out.println("Servidor iniciado en el puerto 8080 y conectado a SQLite.");
         int contador = 0;
 
         while (true) {
@@ -39,6 +39,13 @@ public class ServidorMulti {
                 "    username VARCHAR(15) NOT NULL UNIQUE," +
                 "    password VARCHAR(15) NOT NULL" +
                 ");";
+        String sqlCreateTableBloqueados = "CREATE TABLE IF NOT EXISTS bloqueados (" +
+                "    bloqueador_id INTEGER NOT NULL," +
+                "    bloqueado_id INTEGER NOT NULL," +
+                "    PRIMARY KEY (bloqueador_id, bloqueado_id)," +
+                "    FOREIGN KEY (bloqueador_id) REFERENCES usuarios(id)," +
+                "    FOREIGN KEY (bloqueado_id) REFERENCES usuarios(id)" +
+                ");";
 
         try {
             Class.forName("org.sqlite.JDBC");
@@ -46,6 +53,7 @@ public class ServidorMulti {
                  Statement stmt = conn.createStatement()) {
 
                 stmt.execute(sqlCreateTable);
+                stmt.execute(sqlCreateTableBloqueados);
                 System.out.println("Base de datos SQLite y tabla 'usuarios' listas.");
 
             } catch (SQLException e) {
