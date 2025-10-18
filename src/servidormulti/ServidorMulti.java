@@ -34,7 +34,7 @@ public class ServidorMulti {
         return DriverManager.getConnection(URL_SQLITE);
     }
     private static void inicializarBaseDeDatos() {
-        String sqlCreateTable = "CREATE TABLE IF NOT EXISTS usuarios (" +
+        String sqlCreateTableUsuarios = "CREATE TABLE IF NOT EXISTS usuarios (" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "    username VARCHAR(15) NOT NULL UNIQUE," +
                 "    password VARCHAR(15) NOT NULL" +
@@ -51,23 +51,21 @@ public class ServidorMulti {
             Class.forName("org.sqlite.JDBC");
             try (Connection conn = conexionBD();
                  Statement stmt = conn.createStatement()) {
-
-                stmt.execute(sqlCreateTable);
+                stmt.execute(sqlCreateTableUsuarios);
                 stmt.execute(sqlCreateTableBloqueados);
-                System.out.println("Base de datos SQLite y tabla 'usuarios' listas.");
+                System.out.println("Base de datos SQLite y tablas 'usuarios' y 'bloqueados' listas.");
 
             } catch (SQLException e) {
-                System.err.println("No se pudo inicializar la base de datos shavalon: " + e.getMessage());
+                System.err.println("No se pudo inicializar la base de datos: " + e.getMessage());
                 System.exit(1);
             }
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Error no se encontró la clase del driver de SQLite.");
+            System.err.println("Error CRÍTICO: No se encontró la clase del driver de SQLite.");
             e.printStackTrace();
             System.exit(1);
         }
-    }
-    public static boolean autenticarUsuario(String usuario, String password) {
+    }    public static boolean autenticarUsuario(String usuario, String password) {
         String sql = "SELECT password FROM usuarios WHERE username = ?";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -84,7 +82,6 @@ public class ServidorMulti {
         }
         return false;
     }
-
     public static boolean registrarUsuario(String usuario, String password) {
         String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
         try (Connection conn = conexionBD();
@@ -213,51 +210,38 @@ public class ServidorMulti {
             }
         }
     }
-    private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
-        String sql = "SELECT id FROM usuarios WHERE username = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, usuario);
-            ResultSet rs = pstmt.executeQuery();
-            return rs.next();
-        }
-    }
-    public static void agregarCliente(UnCliente cliente) {
-        clientesConectados.put(cliente.getClienteId(), cliente);
-    }
-
     public static void removerCliente(UnCliente cliente) {
         clientesConectados.remove(cliente.getClienteId());
         enviarMensajePublico(cliente, ">> El usuario '" + cliente.getNombreRemitente() + "' se ha desconectado. <<", true);
     }
-
-    public static void enviarMensajePublico(UnCliente remitente, String mensaje, boolean esNotificacion) {
-        String mensajeCompleto = esNotificacion ? mensaje : remitente.getNombreRemitente() + ": " + mensaje;
-        for (UnCliente cliente : clientesConectados.values()) {
-            if (!cliente.equals(remitente)) {
-                try {
-                    cliente.enviarMensaje(mensajeCompleto);
-                } catch (IOException e) {
-                    System.err.println("Error al enviar mensaje a " + cliente.getClienteId());
-                }
-            }
+    public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
+        if (!existeUsuario(usernameDestinatario)) {
+            remitente.out.println("[Error] El usuario '" + usernameDestinatario + "' no existe.");
+            return;
         }
-    }
-    public static void enviarMensajePrivado(UnCliente remitente, String destinatarios, String mensaje) throws IOException {
-        String mensajeCompleto = "(Privado) " + remitente.getNombreRemitente() + ": " + mensaje;
-        String[] nombresDestinatarios = destinatarios.split(",");
 
-        for (String destNombre : nombresDestinatarios) {
-            boolean encontrado = false;
-            for (UnCliente clienteDestino : clientesConectados.values()) {
-                if (destNombre.trim().equals(clienteDestino.getNombreUsuario()) || destNombre.trim().equals(clienteDestino.getClienteId())) {
-                    clienteDestino.enviarMensaje(mensajeCompleto);
-                    encontrado = true;
+        int idDestinatario = obtenerIdUsuario(usernameDestinatario);
+
+        if (estanBloqueados(remitente.getIdUsuario(), idDestinatario)) {
+            remitente.out.println("[Error] No puedes enviar mensajes a '" + usernameDestinatario + "' (relación de bloqueo).");
+            return;
+        }
+
+        UnCliente clienteDestinatario = null;
+        synchronized (clientesConectados) {
+            for (UnCliente cliente : clientesConectados) {
+                if (cliente.getUsername().equals(usernameDestinatario)) {
+                    clienteDestinatario = cliente;
                     break;
                 }
             }
-            if (!encontrado) {
-                remitente.enviarMensaje("El usuario '" + destNombre.trim() + "' no fue encontrado o no está conectado.");
-            }
+        }
+
+        if (clienteDestinatario != null) {
+            clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
+            remitente.out.println("[Privado para " + usernameDestinatario + "]: " + mensaje);
+        } else {
+            remitente.out.println("[Info] El usuario '" + usernameDestinatario + "' no está conectado.");
         }
     }
     public static boolean cuentaYaEnUso(String usuario) {
