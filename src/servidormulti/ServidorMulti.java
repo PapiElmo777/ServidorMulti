@@ -104,6 +104,25 @@ public class ServidorMulti {
             return false;
         }
     }
+    public int obtenerIdUsuario(String username) {
+        String sql = "SELECT id FROM usuarios WHERE username = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+            return -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    public boolean existeUsuario(String username) {
+        return obtenerIdUsuario(username) != -1;
+    }
     private static boolean usuarioYaExiste(Connection conn, String usuario) throws SQLException {
         String sql = "SELECT id FROM usuarios WHERE username = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
