@@ -158,22 +158,21 @@ public class ServidorMulti {
                 checkStmt.setInt(2, idBloqueado);
                 ResultSet rs = checkStmt.executeQuery();
                 if (rs.next()) {
-                    return "[Info] Ya tenías bloqueado a '" + usernameBloqueado + "'.";
+                    return "Shavalon ya tenías bloqueado a '" + usernameBloqueado + "'.";
                 }
             }
             try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 insertStmt.setInt(1, idBloqueador);
                 insertStmt.setInt(2, idBloqueado);
                 insertStmt.executeUpdate();
-                return "[Éxito] Has bloqueado a '" + usernameBloqueado + "'.";
+                return "Has bloqueado a '" + usernameBloqueado + "'.";
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return "[Error] No se pudo procesar el bloqueo.";
+            return "Shavalon no se pudo procesar el bloqueo.";
         }
-    }
-    public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
+    }    public String desbloquearUsuario(int idBloqueador, String usernameDesbloqueado) {
         if (!existeUsuario(usernameDesbloqueado)) {
             return "[Error] El usuario '" + usernameDesbloqueado + "' no existe.";
         }
