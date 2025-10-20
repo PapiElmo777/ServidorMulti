@@ -188,6 +188,27 @@ public class UnCliente implements Runnable {
             out.println("Error: Formato incorrecto. Usa /registrar <user> <pass>");
         }
     }
+    private void handleMensajeInvitado(String mensaje) {
+        if (mensajesComoInvitado < LIMITE_MENSAJES_INVITADO) {
+            mensajesComoInvitado++;
+            servidor.difundirMensaje(mensaje, this);
+            out.println("[Mensaje " + mensajesComoInvitado + "/" + LIMITE_MENSAJES_INVITADO + " como " + this.guestUsername + "].");
+        } else {
+            out.println("Límite de " + LIMITE_MENSAJES_INVITADO + " mensajes de invitado alcanzado.");
+            out.println("Usa /registrar <user> <pass> o /login <user> <pass>");
+        }
+    }
+    private void procesarMensajeInvitado(String mensaje) {
+        if (mensaje.startsWith("/login ")) {
+            handleLogin(mensaje);
+        } else if (mensaje.startsWith("/registrar ")) {
+            handleRegistro(mensaje);
+        } else if (mensaje.startsWith("/")) {
+            out.println("Comando no disponible para invitados. Debes usar /login o /registrar.");
+        } else {
+            handleMensajeInvitado(mensaje);
+        }
+    }
     private void enviarMenuAyuda() {
         out.println("--- MENU DE AYUDA SHAVALON---");
         out.println(" * /privado <usuario> <mensaje> (Envia un mensaje privado.)");
