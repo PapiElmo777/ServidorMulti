@@ -159,6 +159,35 @@ public class UnCliente implements Runnable {
         }
         servidor.removerCliente(this);
     }
+    private void handleLogin(String mensaje) {
+        String[] partes = mensaje.split(" ", 3);
+        if (partes.length == 3) {
+            if (servidor.autenticarUsuario(partes[1], partes[2])) {
+                this.username = partes[1];
+                this.idUsuario = servidor.obtenerIdUsuario(this.username);
+
+                out.println("BIENVENIDO SHAVALON " + this.username);
+                enviarMenuAyuda();
+                servidor.difundirMensaje("[Servidor] " + this.username + " se ha unido al chat.", this);
+            } else {
+                out.println("Error: Usuario o contraseña incorrectos.");
+            }
+        } else {
+            out.println("Error: Formato incorrecto. Usa /login <user> <pass>");
+        }
+    }
+    private void handleRegistro(String mensaje) {
+        String[] partes = mensaje.split(" ", 3);
+        if (partes.length == 3) {
+            if (servidor.registrarUsuario(partes[1], partes[2])) {
+                out.println("Bienvenido Shavalon. Ahora puedes usar /login " + partes[1] + " <pass>");
+            } else {
+                out.println("Error: El usuario ya existe o hubo un error.");
+            }
+        } else {
+            out.println("Error: Formato incorrecto. Usa /registrar <user> <pass>");
+        }
+    }
     private void enviarMenuAyuda() {
         out.println("--- MENU DE AYUDA SHAVALON---");
         out.println(" * /privado <usuario> <mensaje> (Envia un mensaje privado.)");
