@@ -209,6 +209,25 @@ public class UnCliente implements Runnable {
             handleMensajeInvitado(mensaje);
         }
     }
+    private void handleBloquear(String mensaje) {
+        String[] partes = mensaje.split(" ", 2);
+        if (partes.length == 2) {
+            String respuesta = servidor.bloquearUsuario(this.idUsuario, partes[1]);
+            out.println(respuesta);
+        } else {
+            out.println("Error: Formato incorrecto. Usa /bloquear <username>");
+        }
+    }
+
+    private void handleDesbloquear(String mensaje) {
+        String[] partes = mensaje.split(" ", 2);
+        if (partes.length == 2) {
+            String respuesta = servidor.desbloquearUsuario(this.idUsuario, partes[1]);
+            out.println(respuesta);
+        } else {
+            out.println("Error: Formato incorrecto. Usa /desbloquear <username>");
+        }
+    }
     private void enviarMenuAyuda() {
         out.println("--- MENU DE AYUDA SHAVALON---");
         out.println(" * /privado <usuario> <mensaje> (Envia un mensaje privado.)");
