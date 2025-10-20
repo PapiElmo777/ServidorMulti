@@ -228,6 +228,36 @@ public class UnCliente implements Runnable {
             out.println("Error: Formato incorrecto. Usa /desbloquear <username>");
         }
     }
+    private void handlePrivado(String mensaje) {
+        String[] partes = mensaje.split(" ", 3);
+        if (partes.length >= 3) {
+            String destinatario = partes[1];
+            String msgPrivado = partes[2];
+            servidor.enviarMensajePrivado(msgPrivado, this, destinatario);
+        } else {
+            out.println("Error: Formato incorrecto. Usa /privado <user> <mensaje>");
+        }
+    }
+    private boolean procesarMensajeLogueado(String mensaje) {
+        if (mensaje.startsWith("/bloquear ")) {
+            handleBloquear(mensaje);
+        } else if (mensaje.startsWith("/desbloquear ")) {
+            handleDesbloquear(mensaje);
+        } else if (mensaje.startsWith("/privado ")) {
+            handlePrivado(mensaje);
+        } else if (mensaje.equals("/usuarios")) {
+            out.println(servidor.obtenerListaUsuarios(this.username));
+        } else if (mensaje.equals("/ayuda")) {
+            enviarMenuAyuda();
+        } else if (mensaje.equals("/adios")) {
+            return true;
+        } else if (mensaje.startsWith("/")) {
+            out.println("Comando no reconocido. Escribe /ayuda para ver la lista.");
+        } else {
+            servidor.difundirMensaje(mensaje, this);
+        }
+        return false;
+    }
     private void enviarMenuAyuda() {
         out.println("--- MENU DE AYUDA SHAVALON---");
         out.println(" * /privado <usuario> <mensaje> (Envia un mensaje privado.)");
