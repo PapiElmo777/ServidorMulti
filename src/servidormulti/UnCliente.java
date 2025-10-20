@@ -15,6 +15,7 @@ public class UnCliente implements Runnable {
     private int idUsuario;
     private String guestUsername;
     private int mensajesComoInvitado = 0;
+    private static final int LIMITE_MENSAJES_INVITADO = 3;
     public UnCliente(Socket socket, ServidorMulti servidor) {
         this.socket = socket;
         this.servidor = servidor;
