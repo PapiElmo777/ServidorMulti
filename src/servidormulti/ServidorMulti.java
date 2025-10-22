@@ -221,7 +221,7 @@ public class ServidorMulti {
     public void difundirMensaje(String mensaje, UnCliente remitente) {
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
-                if (!estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
+                if (cliente != remitente && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
                     cliente.out.println(remitente.getUsername() + ": " + mensaje);
                 }
             }
@@ -253,7 +253,6 @@ public class ServidorMulti {
 
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
-            remitente.out.println("[Privado para " + usernameDestinatario + "]: " + mensaje);
         } else {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
