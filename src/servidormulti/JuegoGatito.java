@@ -66,6 +66,22 @@ public class JuegoGatito {
         if (jugadorO != null) {
             jugadorO.out.println("Eres la ficha 'O'. Tu enemigo es " + nombreX + ".");
         }
-
+        notificarTablero();
+        notificarTurno();
     }
+    private void notificarTablero() {
+        String tableroStr = dibujarTablero();
+        notificar(tableroStr);
+    }
+
+    private void notificarTurno() {
+        if (terminado) return;
+        char ficha = turnoActual == jugadorX ? 'X' : 'O';
+        turnoActual.out.println("[Gatito] Es tu turno (" + ficha + "). Usa /mover <1-9>.");
+        UnCliente oponente = getOponente(turnoActual);
+        if (oponente != null) {
+            oponente.out.println("[Gatito] Es el turno de " + turnoActual.getUsername() + ".");
+        }
+    }
+
 }
