@@ -23,4 +23,13 @@ public class JuegoGatito {
 
         notificarInicio(jugadorX.getUsername(), jugadorO.getUsername());
     }
+
+    public UnCliente getOponente(UnCliente jugador) {
+        return jugador == jugadorX ? jugadorO : jugadorX;
+    }
+
+    public boolean esJugador(UnCliente cliente) {
+        return cliente == jugadorX || cliente == jugadorO;
+    }
+
 }
