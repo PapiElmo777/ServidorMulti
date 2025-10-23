@@ -32,4 +32,24 @@ public class JuegoGatito {
         return cliente == jugadorX || cliente == jugadorO;
     }
 
+    public boolean involucraA(String username1, String username2) {
+        String u1 = jugadorX.getUsername();
+        String u2 = jugadorO.getUsername();
+        return (u1.equals(username1) && u2.equals(username2)) || (u1.equals(username2) && u2.equals(username1));
+    }
+
+    private String dibujarTablero() {
+        StringBuilder sb = new StringBuilder("\n--- Tablero Gatito ---\n");
+        for (int i = 0; i < 9; i++) {
+            sb.append(tablero[i] == ' ' ? i + 1 : tablero[i]);
+            if ((i + 1) % 3 == 0) {
+                sb.append("\n");
+                if (i < 8) sb.append("---------------\n");
+            } else {
+                sb.append(" | ");
+            }
+        }
+        sb.append("----------------------\n");
+        return sb.toString();
+    }
 }
