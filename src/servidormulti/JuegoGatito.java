@@ -52,4 +52,20 @@ public class JuegoGatito {
         sb.append("----------------------\n");
         return sb.toString();
     }
+    private void notificar(String mensaje) {
+        if (jugadorX != null) jugadorX.out.println(mensaje);
+        if (jugadorO != null) jugadorO.out.println(mensaje);
+    }
+
+    private void notificarInicio(String nombreX, String nombreO) {
+        notificar("¡Juego iniciado Shavalon!");
+
+        if (jugadorX != null) {
+            jugadorX.out.println("Eres la ficha 'X'. Tu enemigo es " + nombreO + ".");
+        }
+        if (jugadorO != null) {
+            jugadorO.out.println("Eres la ficha 'O'. Tu enemigo es " + nombreX + ".");
+        }
+
+    }
 }
