@@ -148,4 +148,18 @@ public class JuegoGatito {
         return terminado;
     }
 
+    public void forzarTerminacion(UnCliente perdedor) {
+        if (terminado) return;
+        terminado = true;
+
+        UnCliente ganador = getOponente(perdedor);
+
+        if (ganador != null) {
+            ganador.out.println("[Gatito] ¡VICTORIA! " + perdedor.getUsername() + " se ha desconectado o abandonado.");
+        }
+
+        if (perdedor != null) {
+            perdedor.out.println("[Gatito] Has perdido el juego por abandono/desconexión.");
+        }
+    }
 }
