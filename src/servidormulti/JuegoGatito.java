@@ -83,5 +83,42 @@ public class JuegoGatito {
             oponente.out.println("[Gatito] Es el turno de " + turnoActual.getUsername() + ".");
         }
     }
+    public boolean realizarMovimiento(UnCliente cliente, int posicion) {
+        if (terminado) {
+            cliente.out.println("Error: El juego ha terminado.");
+            return true;
+        }
+        if (cliente != turnoActual) {
+            cliente.out.println("Error: No es tu turno.");
+            return false;
+        }
+        if (posicion < 1 || posicion > 9) {
+            cliente.out.println("Error: Posición inválida. Debe ser un número entre 1 y 9. Ejemplo: /mover 5");
+            return false;
+        }
+        if (tablero[posicion - 1] != ' ') {
+            cliente.out.println("Error: La casilla " + posicion + " ya está ocupada.");
+            return false;
+        }
+
+        char ficha = cliente == jugadorX ? 'X' : 'O';
+        tablero[posicion - 1] = ficha;
+
+        notificarTablero();
+
+        if (verificarGanador(ficha)) {
+            notificar("¡FIN DEL JUEGO! el shavalon " + cliente.getUsername() + " (" + ficha + ") ha ganado.");
+            terminado = true;
+            return true;
+        }
+        if (verificarEmpate()) {
+            notificar("¡FIN DEL JUEGO! que pros son, es un empate.");
+            terminado = true;
+            return true;
+        }
+        turnoActual = getOponente(cliente);
+        notificarTurno();
+        return false;
+    }
 
 }
