@@ -120,5 +120,32 @@ public class JuegoGatito {
         notificarTurno();
         return false;
     }
+    private boolean verificarGanador(char ficha) {
+        int[][] lineasGanadoras = {
+                {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Filas
+                {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Columnas
+                {0, 4, 8}, {2, 4, 6}             // Diagonales
+        };
+
+        for (int[] linea : lineasGanadoras) {
+            if (tablero[linea[0]] == ficha &&
+                    tablero[linea[1]] == ficha &&
+                    tablero[linea[2]] == ficha) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarEmpate() {
+        for (char c : tablero) {
+            if (c == ' ') return false;
+        }
+        return true;
+    }
+
+    public boolean haTerminado() {
+        return terminado;
+    }
 
 }
