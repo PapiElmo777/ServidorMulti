@@ -145,6 +145,22 @@ public class UnCliente implements Runnable {
             out.println("Error: Formato incorrecto. Usa /privado <user> <mensaje>");
         }
     }
+    private void handleProponerGatito(String mensaje) {
+        String[] partes = mensaje.split(" ", 2);
+        if (partes.length == 2) {
+            servidor.proponerJuego(this, partes[1]);
+        } else {
+            out.println("Formato incorrecto. Usa /gatito <username>");
+        }
+    }
+    private void handleAceptarGatito(String mensaje) {
+        String[] partes = mensaje.split(" ", 2);
+        if (partes.length == 2) {
+            servidor.aceptarJuego(this, partes[1]);
+        } else {
+            out.println("Formato incorrecto. Usa /aceptar <username>");
+        }
+    }
     private boolean procesarMensajeLogueado(String mensaje) {
         if (mensaje.startsWith("/bloquear ")) {
             handleBloquear(mensaje);
