@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -420,5 +421,20 @@ public class ServidorMulti {
         synchronized (juegosActivos) {
             juegosActivos.remove(juego);
         }
+    }
+    private void forzarFinDeJuego(UnCliente perdedor) {
+        synchronized (juegosActivos) {
+            List<JuegoGatito> juegosARemover = new ArrayList<>();
+            for (JuegoGatito juego : juegosActivos) {
+                if (juego.esJugador(perdedor)) {
+                    juego.forzarTerminacion(perdedor);
+                    juegosARemover.add(juego);
+                }
+            }
+            juegosActivos.removeAll(juegosARemover);
+        }
+        String disconnectedUser = perdedor.getUsername();
+        propuestasPendientes.remove(disconnectedUser);
+        propuestasPendientes.values().removeIf(opponent -> opponent.equals(disconnectedUser));
     }
 }
