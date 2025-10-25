@@ -12,11 +12,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ServidorMulti {
 
     private final List<UnCliente> clientesConectados = Collections.synchronizedList(new ArrayList<>());
     private static final String URL_BD = "jdbc:sqlite:usuarios.db";
+    private final Map<String, String> propuestasPendientes = Collections.synchronizedMap(new HashMap<>());
+    private final List<JuegoGatito> juegosActivos = Collections.synchronizedList(new ArrayList<>());
 
     public static void main(String[] args) {
         ServidorMulti servidor = new ServidorMulti();
@@ -261,6 +264,9 @@ public class ServidorMulti {
     public void removerCliente(UnCliente cliente) {
         boolean removido = clientesConectados.remove(cliente);
 
+        if (cliente.isLogueado()) {
+            forzarFinDeJuego(cliente);
+        }
         if (!removido) {
             System.err.println("Advertencia: Se intentó remover un cliente que no estaba en la lista.");
         }
@@ -290,5 +296,26 @@ public class ServidorMulti {
             return "[Info] No hay otros usuarios registrados.";
         }
         return "[Usuarios] " + String.join(", ", usuarios);
+    }
+    //juego gato
+    private UnCliente obtenerClientePorUsername(String username) {
+        synchronized (clientesConectados) {
+            for (UnCliente cliente : clientesConectados) {
+                if (cliente.isLogueado() && cliente.getUsername().equals(username)) {
+                    return cliente;
+                }
+            }
+            return null;
+        }
+    }
+    private JuegoGatito encontrarJuegoActivo(String username1, String username2) {
+        synchronized (juegosActivos) {
+            for (JuegoGatito juego : juegosActivos) {
+                if (juego.involucraA(username1, username2) && !juego.haTerminado()) {
+                    return juego;
+                }
+            }
+            return null;
+        }
     }
 }
