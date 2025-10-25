@@ -214,8 +214,14 @@ public class UnCliente implements Runnable {
         out.println(" * /bloquear <usuario>          (Bloquea a un usuario.)");
         out.println(" * /desbloquear <usuario>       (Desbloquea a un usuario.)");
         out.println(" * /usuarios                    (Muestra otros usuarios registrados)");
+        out.println("--- JUEGO DEL GATITO ---");
+        out.println(" * /gatito <usuario>            (Propone un juego a otro usuario.)");
+        out.println(" * /aceptar <usuario>           (Acepta la propuesta de un usuario.)");
+        out.println(" * /rechazar <usuario>          (Rechaza la propuesta de un usuario.)");
+        out.println(" * /mover <1-9>                 (Realiza un movimiento en tu juego activo.)");
+        out.println("--- GENERAL ---");
         out.println(" * /ayuda                       (Muestra este menu.)");
-        out.println(" * /adios                       (Desconectarse del chat.)");
+        out.println(" * /adios                       (Desconectarse del chat. Pierdes si estás jugando.)");
         out.println(" * (Escribe cualquier otra cosa para un mensaje público)");
         out.println("-------------------------");
     }

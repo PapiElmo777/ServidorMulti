@@ -155,11 +155,11 @@ public class JuegoGatito {
         UnCliente ganador = getOponente(perdedor);
 
         if (ganador != null) {
-            ganador.out.println("[Gatito] ¡VICTORIA! " + perdedor.getUsername() + " se ha desconectado o abandonado.");
+            ganador.out.println("¡VICTORIA SHAVALON! " + perdedor.getUsername() + " ha huido.");
         }
 
         if (perdedor != null) {
-            perdedor.out.println("[Gatito] Has perdido el juego por abandono/desconexión.");
+            perdedor.out.println("Has perdido el juego por abandono/desconexión.");
         }
     }
 }
