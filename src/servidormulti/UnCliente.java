@@ -185,7 +185,17 @@ public class UnCliente implements Runnable {
             handleDesbloquear(mensaje);
         } else if (mensaje.startsWith("/privado ")) {
             handlePrivado(mensaje);
-        } else if (mensaje.equals("/usuarios")) {
+        }
+        else if (mensaje.startsWith("/gatito ")) {
+            handleProponerGatito(mensaje);
+        } else if (mensaje.startsWith("/aceptar ")) {
+            handleAceptarGatito(mensaje);
+        } else if (mensaje.startsWith("/rechazar ")) {
+            handleRechazarGatito(mensaje);
+        } else if (mensaje.startsWith("/mover ")) {
+            handleMoverGatito(mensaje);
+        }
+        else if (mensaje.equals("/usuarios")) {
             out.println(servidor.obtenerListaUsuarios(this.username));
         } else if (mensaje.equals("/ayuda")) {
             enviarMenuAyuda();
