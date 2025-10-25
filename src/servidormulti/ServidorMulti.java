@@ -357,4 +357,21 @@ public class ServidorMulti {
         oponente.out.println(proponente.getUsername() + " te ha retado a una partida de Gatito.");
         oponente.out.println("Usa /aceptar " + proponente.getUsername() + " para empezar o /rechazar " + proponente.getUsername() + ".");
     }
+    public void aceptarJuego(UnCliente aceptante, String proponenteUsername) {
+        if (!propuestasPendientes.containsKey(proponenteUsername) ||
+                !propuestasPendientes.get(proponenteUsername).equals(aceptante.getUsername())) {
+            aceptante.out.println("No tienes una propuesta pendiente de '" + proponenteUsername + "'.");
+            return;
+        }
+
+        UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
+        if (proponente == null) {
+            aceptante.out.println("El proponente se ha huido.");
+            propuestasPendientes.remove(proponenteUsername);
+            return;
+        }
+        propuestasPendientes.remove(proponenteUsername);
+        JuegoGatito nuevoJuego = new JuegoGatito(proponente, aceptante);
+        juegosActivos.add(nuevoJuego);
+    }
 }
