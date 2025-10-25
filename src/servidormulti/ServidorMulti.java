@@ -318,4 +318,43 @@ public class ServidorMulti {
             return null;
         }
     }
+    public void proponerJuego(UnCliente proponente, String oponenteUsername) {
+        if (proponente.getUsername().equals(oponenteUsername)) {
+            proponente.out.println("No puedes jugar Gatito contigo mismo, socializa!!!");
+            return;
+        }
+        if (!existeUsuario(oponenteUsername)) {
+            proponente.out.println("El shavalon '" + oponenteUsername + "' no está registrado.");
+            return;
+        }
+        UnCliente oponente = obtenerClientePorUsername(oponenteUsername);
+        if (oponente == null) {
+            proponente.out.println("El shavalon '" + oponenteUsername + "' no está conectado en este momento.");
+            return;
+        }
+        if (encontrarJuegoActivo(proponente.getUsername(), oponenteUsername) != null) {
+            proponente.out.println("Ya tienes un juego activo con '" + oponenteUsername + "'.");
+            return;
+        }
+        if (propuestasPendientes.containsKey(proponente.getUsername())) {
+            proponente.out.println("Ya tienes una propuesta pendiente enviada a '" + propuestasPendientes.get(proponente.getUsername()) + "'.");
+            return;
+        }
+        for (Map.Entry<String, String> entry : propuestasPendientes.entrySet()) {
+            if (entry.getValue().equals(proponente.getUsername())) {
+                proponente.out.println("El shavalon '" + entry.getKey() + "' ya te propuso un juego. Acepta o rechaza primero.");
+                return;
+            }
+        }
+        if (propuestasPendientes.containsKey(oponenteUsername)) {
+            proponente.out.println(oponenteUsername + " ya tiene una propuesta pendiente enviada a otro usuario.");
+            return;
+        }
+
+        propuestasPendientes.put(proponente.getUsername(), oponenteUsername);
+
+        proponente.out.println("Propuesta de juego enviada a '" + oponenteUsername + "'.");
+        oponente.out.println(proponente.getUsername() + " te ha retado a una partida de Gatito.");
+        oponente.out.println("Usa /aceptar " + proponente.getUsername() + " para empezar o /rechazar " + proponente.getUsername() + ".");
+    }
 }
