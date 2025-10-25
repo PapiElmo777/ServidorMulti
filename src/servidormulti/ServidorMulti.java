@@ -374,4 +374,20 @@ public class ServidorMulti {
         JuegoGatito nuevoJuego = new JuegoGatito(proponente, aceptante);
         juegosActivos.add(nuevoJuego);
     }
+    public void rechazarJuego(UnCliente rechazante, String proponenteUsername) {
+        if (!propuestasPendientes.containsKey(proponenteUsername) ||
+                !propuestasPendientes.get(proponenteUsername).equals(rechazante.getUsername())) {
+            rechazante.out.println("Shavalon, no tienes propuestas pendientes de '" + proponenteUsername + "'.");
+            return;
+        }
+
+        UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
+        propuestasPendientes.remove(proponenteUsername);
+
+        rechazante.out.println("No quisiste jugar Gatito con '" + proponenteUsername + "'.");
+
+        if (proponente != null) {
+            proponente.out.println("Shavalon " + rechazante.getUsername() + " ha rechazado tu partidita, ff.");
+        }
+    }
 }
