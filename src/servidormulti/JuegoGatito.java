@@ -38,8 +38,10 @@ public class JuegoGatito {
         return (u1.equals(username1) && u2.equals(username2)) || (u1.equals(username2) && u2.equals(username1));
     }
 
-    private String dibujarTablero() {
-        StringBuilder sb = new StringBuilder("\n--- Tablero Gatito ---\n");
+    private String dibujarTablero(UnCliente espectador) {
+        UnCliente oponente = getOponente(espectador);
+        String nombreOponente = (oponente != null) ? oponente.getUsername() : "???";
+        StringBuilder sb = new StringBuilder("\n--- Partidita con  " + nombreOponente + " ---\n");
         for (int i = 0; i < 9; i++) {
             if (tablero[i] == ' ') {
                 sb.append(i + 1);
@@ -48,7 +50,7 @@ public class JuegoGatito {
             }
             if ((i + 1) % 3 == 0) {
                 sb.append("\n");
-            if (i < 8) sb.append("--------\n");
+                if (i < 8) sb.append("--------\n");
             } else {
                 sb.append(" | ");
             }
@@ -74,8 +76,12 @@ public class JuegoGatito {
         notificarTurno();
     }
     private void notificarTablero() {
-        String tableroStr = dibujarTablero();
-        notificar(tableroStr);
+        if (jugadorX != null) {
+            jugadorX.out.println(dibujarTablero(jugadorX));
+        }
+        if (jugadorO != null) {
+            jugadorO.out.println(dibujarTablero(jugadorO));
+        }
     }
 
     private void notificarTurno() {
