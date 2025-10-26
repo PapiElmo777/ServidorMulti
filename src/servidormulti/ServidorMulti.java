@@ -431,6 +431,55 @@ public class ServidorMulti {
         }
         return lista;
     }
+    public synchronized int contarJuegosActivos(UnCliente cliente) {
+        return getJuegosActivos(cliente).size();
+    }
+    public synchronized void manejarMovimientoGatito(UnCliente cliente, String argumentos) {
+        List<JuegoGatito> juegosDelCliente = getJuegosActivos(cliente);
+        int cantidadJuegos = juegosDelCliente.size();
+
+        if (cantidadJuegos == 0) {
+            cliente.out.println("No estás participando en ningún juego.");
+            return;
+        }
+
+        JuegoGatito juegoParaMover = null;
+        String posStr = "";
+
+        if (cantidadJuegos == 1) {
+            juegoParaMover = juegosDelCliente.get(0);
+            posStr = argumentos.trim();
+        } else {
+            String[] partes = argumentos.split(" ", 2);
+            if (partes.length < 2) {
+                cliente.out.println("Tienes " + cantidadJuegos + " partidas activas.");
+                cliente.out.println("Usa /mover <oponente> <1-9> para especificar en cuál mover.");
+                return;
+            }
+            String oponenteNombre = partes[0];
+            posStr = partes[1].trim();
+            for (JuegoGatito juego : juegosDelCliente) {
+                UnCliente oponente = juego.getOponente(cliente);
+                if (oponente.getUsername().equalsIgnoreCase(oponenteNombre)) {
+                    juegoParaMover = juego;
+                    break;
+                }
+            }
+            if (juegoParaMover == null) {
+                cliente.out.println("No se encontró una partida activa con '" + oponenteNombre + "'.");
+                return;
+            }
+        }
+        try {
+            int posicion = Integer.parseInt(posStr);
+            if (juegoParaMover.realizarMovimiento(cliente, posicion)) {
+                removerJuego(juegoParaMover);
+            }
+
+        } catch (NumberFormatException e) {
+            cliente.out.println("La posición '" + posStr + "' no es un número válido (1-9).");
+        }
+    }
 
 
 }
