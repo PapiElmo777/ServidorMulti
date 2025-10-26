@@ -298,6 +298,14 @@ public class ServidorMulti {
         }
         return "[Usuarios] " + String.join(", ", usuarios);
     }
+    public synchronized boolean estaUsuarioConectado(String username) {
+        for (UnCliente cliente : clientesConectados) {
+            if (cliente.isLogueado() && cliente.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
