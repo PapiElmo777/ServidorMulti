@@ -69,18 +69,23 @@ public class UnCliente implements Runnable {
     private void handleLogin(String mensaje) {
         String[] partes = mensaje.split(" ", 3);
         if (partes.length == 3) {
-            if (servidor.autenticarUsuario(partes[1], partes[2])) {
-                this.username = partes[1];
+            String user = partes[1];
+            String pass = partes[2];
+            if (servidor.estaUsuarioConectado(user)) {
+                out.println("Error: La cuenta '" + user + "' ya está en uso.");
+
+            } else if (servidor.autenticarUsuario(user, pass)) {
+                this.username = user;
                 this.idUsuario = servidor.obtenerIdUsuario(this.username);
 
                 out.println("BIENVENIDO SHAVALON " + this.username);
                 enviarMenuAyuda();
                 servidor.difundirMensaje("[Servidor] " + this.username + " se ha unido al chat.", this);
             } else {
-                out.println("Error: Usuario o contraseña incorrectos.");
+                out.println("Usuario o contraseña incorrectos.");
             }
         } else {
-            out.println("Error: Formato incorrecto. Usa /login <user> <pass>");
+            out.println("Formato incorrecto. Usa /login <user> <pass>");
         }
     }
     private void handleRegistro(String mensaje) {

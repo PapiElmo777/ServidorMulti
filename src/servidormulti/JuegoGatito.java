@@ -41,10 +41,14 @@ public class JuegoGatito {
     private String dibujarTablero() {
         StringBuilder sb = new StringBuilder("\n--- Tablero Gatito ---\n");
         for (int i = 0; i < 9; i++) {
-            sb.append(tablero[i] == ' ' ? i + 1 : tablero[i]);
+            if (tablero[i] == ' ') {
+                sb.append(i + 1);
+            } else {
+                sb.append(tablero[i]);
+            }
             if ((i + 1) % 3 == 0) {
                 sb.append("\n");
-                if (i < 8) sb.append("---------------\n");
+            if (i < 8) sb.append("--------\n");
             } else {
                 sb.append(" | ");
             }
