@@ -180,6 +180,9 @@ public class UnCliente implements Runnable {
         String argumentos = (partes.length == 2) ? partes[1] : "";
         servidor.manejarMovimientoGatito(this, argumentos);
     }
+    public int getCantidadJuegosActivos() {
+        return servidor.contarJuegosActivos(this);
+    }
     private boolean procesarMensajeLogueado(String mensaje) {
         if (mensaje.startsWith("/bloquear ")) {
             handleBloquear(mensaje);
