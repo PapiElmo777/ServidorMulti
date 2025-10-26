@@ -341,6 +341,10 @@ public class ServidorMulti {
             proponente.out.println("El shavalon '" + oponenteUsername + "' no está conectado en este momento.");
             return;
         }
+        if (estanBloqueados(proponente.getIdUsuario(), oponente.getIdUsuario())) {
+            proponente.out.println("Shavalon, no puedes juagar con '" + oponenteUsername + "' porque estan enojados.");
+            return;
+        }
         if (encontrarJuegoActivo(proponente.getUsername(), oponenteUsername) != null) {
             proponente.out.println("Ya tienes un juego activo con '" + oponenteUsername + "'.");
             return;
@@ -376,6 +380,11 @@ public class ServidorMulti {
         UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
         if (proponente == null) {
             aceptante.out.println("El proponente se ha huido.");
+            propuestasPendientes.remove(proponenteUsername);
+            return;
+        }
+        if (estanBloqueados(aceptante.getIdUsuario(), proponente.getIdUsuario())) {
+            aceptante.out.println("Shavalon, no puedes juagar con '" + proponenteUsername + "' porque estan enojados.");
             propuestasPendientes.remove(proponenteUsername);
             return;
         }
