@@ -445,4 +445,16 @@ public class ServidorMulti {
         propuestasPendientes.remove(disconnectedUser);
         propuestasPendientes.values().removeIf(opponent -> opponent.equals(disconnectedUser));
     }
+    public synchronized List<JuegoGatito> getJuegosActivos(UnCliente cliente) {
+        List<JuegoGatito> lista = new ArrayList<>();
+        for (JuegoGatito juego : juegosActivos) {
+            if (!juego.haTerminado() && juego.esJugador(cliente)) {
+                lista.add(juego);
+            }
+        }
+        return lista;
+    }
+    public synchronized int contarJuegosActivos(UnCliente cliente) {
+        return getJuegosActivos(cliente).size();
+    }
 }
