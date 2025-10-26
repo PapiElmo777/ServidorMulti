@@ -399,32 +399,7 @@ public class ServidorMulti {
             proponente.out.println("Shavalon " + rechazante.getUsername() + " ha rechazado tu partidita, ff.");
         }
     }
-    public void manejarMovimientoGatito(UnCliente cliente, String posicionStr) {
-        JuegoGatito juegoEnCurso = null;
-        synchronized (juegosActivos) {
-            for (JuegoGatito juego : juegosActivos) {
-                if (juego.esJugador(cliente) && !juego.haTerminado()) {
-                    juegoEnCurso = juego;
-                    break;
-                }
-            }
-        }
-        if (juegoEnCurso == null) {
-            cliente.out.println("Shavalon, no estás en un juego de Gatito activo. Usa /gatito <user> para retarlo a una partidita.");
-            return;
-        }
-        int posicion;
-        try {
-            posicion = Integer.parseInt(posicionStr);
-        } catch (NumberFormatException e) {
-            cliente.out.println("La posición debe ser un número entre 1 y 9. Ejemplo: /mover 5");
-            return;
-        }
 
-        if (juegoEnCurso.realizarMovimiento(cliente, posicion)) {
-            removerJuego(juegoEnCurso);
-        }
-    }
     private void removerJuego(JuegoGatito juego) {
         synchronized (juegosActivos) {
             juegosActivos.remove(juego);
@@ -445,16 +420,6 @@ public class ServidorMulti {
         propuestasPendientes.remove(disconnectedUser);
         propuestasPendientes.values().removeIf(opponent -> opponent.equals(disconnectedUser));
     }
-    public synchronized List<JuegoGatito> getJuegosActivos(UnCliente cliente) {
-        List<JuegoGatito> lista = new ArrayList<>();
-        for (JuegoGatito juego : juegosActivos) {
-            if (!juego.haTerminado() && juego.esJugador(cliente)) {
-                lista.add(juego);
-            }
-        }
-        return lista;
-    }
-    public synchronized int contarJuegosActivos(UnCliente cliente) {
-        return getJuegosActivos(cliente).size();
-    }
+
+
 }
