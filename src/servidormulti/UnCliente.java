@@ -177,11 +177,8 @@ public class UnCliente implements Runnable {
 
     private void handleMoverGatito(String mensaje) {
         String[] partes = mensaje.split(" ", 2);
-        if (partes.length == 2) {
-            servidor.manejarMovimientoGatito(this, partes[1]);
-        } else {
-            out.println("Formato incorrecto. Usa /mover <1-9>");
-        }
+        String argumentos = (partes.length == 2) ? partes[1] : "";
+        servidor.manejarMovimientoGatito(this, argumentos);
     }
     private boolean procesarMensajeLogueado(String mensaje) {
         if (mensaje.startsWith("/bloquear ")) {
