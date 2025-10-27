@@ -89,16 +89,18 @@ public class JuegoGatito {
         char ficha = turnoActual == jugadorX ? 'X' : 'O';
         UnCliente oponente = getOponente(turnoActual);
         int juegosDelJugador = turnoActual.getCantidadJuegosActivos();
-
         if (juegosDelJugador > 1) {
             String nombreOponente = (oponente != null) ? oponente.getUsername() : "??";
-            turnoActual.out.println("Shavalon es tu turno (" + ficha + ") en la partida con " + nombreOponente + ".");
-            turnoActual.out.println("Usa /mover " + nombreOponente + " <1-9>.");
+
+            turnoActual.out.println("Tienes " + juegosDelJugador + " partidas activas.");
+            turnoActual.out.println("[Gatito] Es tu turno ("+ ficha +") contra " + nombreOponente + ".");
+            turnoActual.out.println("Usa /mover " + nombreOponente + " <1-9> para especificar en cuál mover.");
+
         } else {
-            turnoActual.out.println("Shavalon Es tu turno (" + ficha + "). Usa /mover <1-9>.");
+            turnoActual.out.println("[Gatito] Es tu turno (" + ficha + "). Usa /mover <1-9>.");
         }
         if (oponente != null) {
-            oponente.out.println("Shavalon Es el turno de " + turnoActual.getUsername() + ".");
+            oponente.out.println("[Gatito] Es el turno de " + turnoActual.getUsername() + ".");
         }
     }
     public boolean realizarMovimiento(UnCliente cliente, int posicion) {
