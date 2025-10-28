@@ -108,20 +108,47 @@ public class ServidorMulti {
     }
 
     public boolean registrarUsuario(String username, String password) {
-        String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
-        try (Connection conn = conexionBD();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sqlInsertUsuario = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
+        String sqlInsertRanking = "INSERT INTO ranking(usuario_id, victorias, derrotas, empates) VALUES (?, 0, 0, 0)";
 
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            pstmt.executeUpdate();
+        Connection conn = null;
+        try {
+            conn = conexionBD();
+            conn.setAutoCommit(false);
+            long idUsuario = -1;
+            try (PreparedStatement pstmtUsuario = conn.prepareStatement(sqlInsertUsuario, Statement.RETURN_GENERATED_KEYS)) {
+                pstmtUsuario.setString(1, username);
+                pstmtUsuario.setString(2, password);
+                pstmtUsuario.executeUpdate();
+                ResultSet rs = pstmtUsuario.getGeneratedKeys();
+                if (rs.next()) {
+                    idUsuario = rs.getLong(1);
+                }
+            }
+            if (idUsuario == -1) {
+                conn.rollback();
+                return false;
+            }
+            try (PreparedStatement pstmtRanking = conn.prepareStatement(sqlInsertRanking)) {
+                pstmtRanking.setLong(1, idUsuario);
+                pstmtRanking.executeUpdate();
+            }
+            conn.commit();
             return true;
+
         } catch (SQLException e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
             if (e.getErrorCode() == 19) {
                 return false;
             }
             e.printStackTrace();
             return false;
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
         }
     }
 
