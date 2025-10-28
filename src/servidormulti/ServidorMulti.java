@@ -546,4 +546,14 @@ public class ServidorMulti {
             System.err.println("Error al registrar derrota: " + e.getMessage());
         }
     }
+    public synchronized void registrarEmpate(int usuarioId) {
+        String sql = "UPDATE ranking SET empates = empates + 1 WHERE usuario_id = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al registrar empate: " + e.getMessage());
+        }
+    }
 }
