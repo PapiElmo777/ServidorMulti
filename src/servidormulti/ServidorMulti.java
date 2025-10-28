@@ -556,4 +556,18 @@ public class ServidorMulti {
             System.err.println("Error al registrar empate: " + e.getMessage());
         }
     }
+    public synchronized int[] getEstadisticas(int usuarioId) {
+        String sql = "SELECT victorias, derrotas, empates FROM ranking WHERE usuario_id = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new int[]{rs.getInt("victorias"), rs.getInt("derrotas"), rs.getInt("empates")};
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener estadísticas: " + e.getMessage());
+        }
+        return new int[]{0, 0, 0};
+    }
 }
