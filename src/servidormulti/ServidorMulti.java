@@ -55,14 +55,22 @@ public class ServidorMulti {
                 "    FOREIGN KEY (bloqueador_id) REFERENCES usuarios(id)," +
                 "    FOREIGN KEY (bloqueado_id) REFERENCES usuarios(id)" +
                 ");";
+        String sqlCreateTableRanking = "CREATE TABLE IF NOT EXISTS ranking (" +
+                "    usuario_id INTEGER PRIMARY KEY," +
+                "    victorias INTEGER NOT NULL DEFAULT 0," +
+                "    derrotas INTEGER NOT NULL DEFAULT 0," +
+                "    empates INTEGER NOT NULL DEFAULT 0," +
+                "    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE" +
+                ");";
 
         try {
             Class.forName("org.sqlite.JDBC");
 
-            try (Connection conn = conexionBD(); // Llama al método estático
+            try (Connection conn = conexionBD();
                  Statement stmt = conn.createStatement()) {
                 stmt.execute(sqlCreateTableUsuarios);
                 stmt.execute(sqlCreateTableBloqueados);
+                stmt.execute(sqlCreateTableRanking);
                 System.out.println("Base de datos SQLite y tablas 'usuarios' y 'bloqueados' listas.");
 
             } catch (SQLException e) {
