@@ -525,5 +525,15 @@ public class ServidorMulti {
         }
     }
 
-
+    //ranking
+    public synchronized void registrarVictoria(int usuarioId) {
+        String sql = "UPDATE ranking SET victorias = victorias + 1 WHERE usuario_id = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al registrar victoria: " + e.getMessage());
+        }
+    }
 }
