@@ -543,7 +543,9 @@ public class ServidorMulti {
 
     //ranking
     public synchronized void registrarVictoria(int usuarioId) {
-        String sql = "UPDATE ranking SET victorias = victorias + 1 WHERE usuario_id = ?";
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 1, 0, 0, 2) " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET victorias = victorias + 1, puntaje = puntaje + 2";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, usuarioId);
@@ -553,8 +555,8 @@ public class ServidorMulti {
         }
     }
     public synchronized void registrarDerrota(int usuarioId) {
-        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates) " +
-                "VALUES (?, 0, 1, 0) " +
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 0, 1, 0, 0) " +
                 "ON CONFLICT(usuario_id) DO UPDATE SET derrotas = derrotas + 1";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -565,9 +567,9 @@ public class ServidorMulti {
         }
     }
     public synchronized void registrarEmpate(int usuarioId) {
-        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates) " +
-                "VALUES (?, 0, 0, 1) " +
-                "ON CONFLICT(usuario_id) DO UPDATE SET empates = empates + 1";
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 0, 0, 1, 1) " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET empates = empates + 1, puntaje = puntaje + 1";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, usuarioId);
