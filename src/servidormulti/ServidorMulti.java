@@ -616,4 +616,33 @@ public class ServidorMulti {
             e.printStackTrace();
         }
     }
+    public void compararEstadisticas(UnCliente solicitante, String oponenteUsername) {
+        int idOponente = obtenerIdUsuario(oponenteUsername);
+        if (idOponente == -1) {
+            solicitante.out.println("Error: El usuario '" + oponenteUsername + "' no existe.");
+            return;
+        }
+
+        int[] statsSolicitante = getEstadisticas(solicitante.getIdUsuario());
+        int[] statsOponente = getEstadisticas(idOponente);
+
+        int victoriasTu = statsSolicitante[0];
+        int victoriasEl = statsOponente[0];
+
+        double totalVictorias = victoriasTu + victoriasEl;
+
+        if (totalVictorias == 0) {
+            solicitante.out.println("[Comparativa] Ambos tienen 0 victorias totales. ¡A jugar!");
+            return;
+        }
+
+        double porcTu = (victoriasTu / totalVictorias) * 100.0;
+        double porcEl = (victoriasEl / totalVictorias) * 100.0;
+
+        String comparativa = String.format("[Comparativa de Victorias] %s (%.0f%%) vs. %s (%.0f%%)",
+                solicitante.getUsername(), porcTu,
+                oponenteUsername, porcEl);
+
+        solicitante.out.println(comparativa);
+    }
 }
