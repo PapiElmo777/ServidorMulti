@@ -60,6 +60,7 @@ public class ServidorMulti {
                 "    victorias INTEGER NOT NULL DEFAULT 0," +
                 "    derrotas INTEGER NOT NULL DEFAULT 0," +
                 "    empates INTEGER NOT NULL DEFAULT 0," +
+                "    puntaje INTEGER NOT NULL DEFAULT 0," +
                 "    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE" +
                 ");";
 
@@ -109,7 +110,7 @@ public class ServidorMulti {
 
     public boolean registrarUsuario(String username, String password) {
         String sqlInsertUsuario = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
-        String sqlInsertRanking = "INSERT INTO ranking(usuario_id, victorias, derrotas, empates) VALUES (?, 0, 0, 0)";
+        String sqlInsertRanking = "INSERT INTO ranking(usuario_id, victorias, derrotas, empates, puntaje) VALUES (?, 0, 0, 0, 0)";
 
         Connection conn = null;
         try {
