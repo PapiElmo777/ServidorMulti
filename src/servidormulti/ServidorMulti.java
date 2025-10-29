@@ -598,14 +598,14 @@ public class ServidorMulti {
         return new int[]{0, 0, 0, 0};
     }
     public void mostrarRanking(UnCliente solicitante) {
-        String sql = "SELECT u.username, r.victorias, r.derrotas, r.empates " +
+        String sql = "SELECT u.username, r.victorias, r.derrotas, r.empates, r.puntaje " +
                 "FROM ranking r JOIN usuarios u ON r.usuario_id = u.id " +
-                "ORDER BY r.victorias DESC, r.derrotas ASC, r.empates DESC " +
+                "ORDER BY r.puntaje DESC, r.victorias DESC, r.derrotas ASC " +
                 "LIMIT 10";
 
         StringBuilder ranking = new StringBuilder("\n--- RANKING DE SHAVALONES (TOP 10) ---\n");
-        ranking.append(String.format("%-4s %-15s %-4s %-4s %-4s\n", "Pos", "Usuario", "V", "D", "E"));
-        ranking.append("---------------------------------------\n");
+        ranking.append(String.format("%-4s %-15s %-6s %-4s %-4s %-4s\n", "Pos", "Usuario", "Puntos", "V", "D", "E"));
+        ranking.append("-----------------------------------------------\n");
 
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -615,17 +615,20 @@ public class ServidorMulti {
             boolean hayDatos = false;
             while (rs.next()) {
                 hayDatos = true;
-                ranking.append(String.format("%-4d %-15s %-4d %-4d %-4d\n",
+                ranking.append(String.format("%-4d %-15s %-6d %-4d %-4d %-4d\n",
                         pos++,
                         rs.getString("username"),
+                        rs.getInt("puntaje"),
                         rs.getInt("victorias"),
                         rs.getInt("derrotas"),
                         rs.getInt("empates")));
             }
+
             if (!hayDatos) {
                 ranking.append("       Aún no hay shavalones en el ranking. ¡A jugar!\n");
             }
-            ranking.append("---------------------------------------\n");
+
+            ranking.append("-----------------------------------------------\n");
             solicitante.out.println(ranking.toString());
 
         } catch (SQLException e) {
