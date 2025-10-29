@@ -552,7 +552,9 @@ public class ServidorMulti {
         }
     }
     public synchronized void registrarDerrota(int usuarioId) {
-        String sql = "UPDATE ranking SET derrotas = derrotas + 1 WHERE usuario_id = ?";
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates) " +
+                "VALUES (?, 0, 1, 0) " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET derrotas = derrotas + 1";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, usuarioId);
@@ -562,7 +564,9 @@ public class ServidorMulti {
         }
     }
     public synchronized void registrarEmpate(int usuarioId) {
-        String sql = "UPDATE ranking SET empates = empates + 1 WHERE usuario_id = ?";
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates) " +
+                "VALUES (?, 0, 0, 1) " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET empates = empates + 1";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, usuarioId);
@@ -600,13 +604,18 @@ public class ServidorMulti {
 
             ResultSet rs = pstmt.executeQuery();
             int pos = 1;
+            boolean hayDatos = false;
             while (rs.next()) {
+                hayDatos = true;
                 ranking.append(String.format("%-4d %-15s %-4d %-4d %-4d\n",
                         pos++,
                         rs.getString("username"),
                         rs.getInt("victorias"),
                         rs.getInt("derrotas"),
                         rs.getInt("empates")));
+            }
+            if (!hayDatos) {
+                ranking.append("       Aún no hay shavalones en el ranking. ¡A jugar!\n");
             }
             ranking.append("---------------------------------------\n");
             solicitante.out.println(ranking.toString());
