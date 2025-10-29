@@ -145,11 +145,13 @@ public class JuegoGatito {
         if (verificarGanador(ficha)) {
             notificar("¡FIN DEL JUEGO! el shavalon " + cliente.getUsername() + " (" + ficha + ") ha ganado.");
             terminado = true;
+            this.ganador = cliente;
             return true;
         }
         if (verificarEmpate()) {
             notificar("¡FIN DEL JUEGO! que pros son, es un empate.");
             terminado = true;
+            this.esEmpate = true;
             return true;
         }
         turnoActual = getOponente(cliente);

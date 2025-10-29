@@ -234,6 +234,9 @@ public class UnCliente implements Runnable {
         out.println(" * /bloquear <usuario>          (Bloquea a un usuario.)");
         out.println(" * /desbloquear <usuario>       (Desbloquea a un usuario.)");
         out.println(" * /usuarios                    (Muestra otros usuarios registrados)");
+        out.println("--- RANKING ---");
+        out.println(" * /ranking                     (Muestra a los mejores 10 Shavalones en el gatito.)");
+        out.println(" * /comparar <usuario>          (Compara tus victorias con otro shavalon.)");
         out.println("--- JUEGO DEL GATITO ---");
         out.println(" * /gatito <usuario>            (Propone un juego a otro usuario.)");
         out.println(" * /aceptar <usuario>           (Acepta la propuesta de un usuario.)");
