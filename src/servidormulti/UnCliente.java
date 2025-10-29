@@ -180,6 +180,16 @@ public class UnCliente implements Runnable {
         String argumentos = (partes.length == 2) ? partes[1] : "";
         servidor.manejarMovimientoGatito(this, argumentos);
     }
+
+    private void handleComparar(String mensaje) {
+        String[] partes = mensaje.split(" ", 2);
+        if (partes.length == 2) {
+            servidor.compararEstadisticas(this, partes[1]);
+        } else {
+            out.println("Formato incorrecto. Usa /comparar <username>");
+        }
+    }
+
     public int getCantidadJuegosActivos() {
         return servidor.contarJuegosActivos(this);
     }
