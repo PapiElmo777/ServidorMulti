@@ -191,7 +191,7 @@ public class JuegoGatito {
         terminado = true;
 
         UnCliente ganador = getOponente(perdedor);
-
+        this.ganador = ganador;
         if (ganador != null) {
             ganador.out.println("¡VICTORIA SHAVALON! " + perdedor.getUsername() + " ha huido.");
         }
