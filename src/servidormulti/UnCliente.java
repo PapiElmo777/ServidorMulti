@@ -210,6 +210,11 @@ public class UnCliente implements Runnable {
         } else if (mensaje.startsWith("/mover ")) {
             handleMoverGatito(mensaje);
         }
+        else if (mensaje.equals("/ranking")) {
+            servidor.mostrarRanking(this);
+        } else if (mensaje.startsWith("/comparar ")) {
+            handleComparar(mensaje);
+        }
         else if (mensaje.equals("/usuarios")) {
             out.println(servidor.obtenerListaUsuarios(this.username));
         } else if (mensaje.equals("/ayuda")) {
