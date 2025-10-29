@@ -579,18 +579,23 @@ public class ServidorMulti {
         }
     }
     public synchronized int[] getEstadisticas(int usuarioId) {
-        String sql = "SELECT victorias, derrotas, empates FROM ranking WHERE usuario_id = ?";
+        String sql = "SELECT victorias, derrotas, empates, puntaje FROM ranking WHERE usuario_id = ?";
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, usuarioId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return new int[]{rs.getInt("victorias"), rs.getInt("derrotas"), rs.getInt("empates")};
+                return new int[]{
+                        rs.getInt("victorias"),
+                        rs.getInt("derrotas"),
+                        rs.getInt("empates"),
+                        rs.getInt("puntaje")
+                };
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener estadísticas: " + e.getMessage());
         }
-        return new int[]{0, 0, 0};
+        return new int[]{0, 0, 0, 0};
     }
     public void mostrarRanking(UnCliente solicitante) {
         String sql = "SELECT u.username, r.victorias, r.derrotas, r.empates " +
