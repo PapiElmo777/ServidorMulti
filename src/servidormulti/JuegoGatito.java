@@ -9,6 +9,8 @@ public class JuegoGatito {
     private final char[] tablero = new char[9];
     private UnCliente turnoActual;
     private boolean terminado = false;
+    private UnCliente ganador = null;
+    private boolean esEmpate = false;
 
     public JuegoGatito(UnCliente p1, UnCliente p2) {
         Arrays.fill(tablero, ' ');
@@ -23,7 +25,21 @@ public class JuegoGatito {
 
         notificarInicio(jugadorX.getUsername(), jugadorO.getUsername());
     }
+    public UnCliente getGanador() {
+        return ganador;
+    }
 
+    public boolean esEmpate() {
+        return esEmpate;
+    }
+
+    public UnCliente getJugadorX() {
+        return jugadorX;
+    }
+
+    public UnCliente getJugadorO() {
+        return jugadorO;
+    }
     public UnCliente getOponente(UnCliente jugador) {
         return jugador == jugadorX ? jugadorO : jugadorX;
     }

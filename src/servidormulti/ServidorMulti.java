@@ -455,6 +455,11 @@ public class ServidorMulti {
             for (JuegoGatito juego : juegosActivos) {
                 if (juego.esJugador(perdedor)) {
                     juego.forzarTerminacion(perdedor);
+                    UnCliente ganador = juego.getGanador();
+                    if (ganador != null) {
+                        registrarVictoria(ganador.getIdUsuario());
+                    }
+                    registrarDerrota(perdedor.getIdUsuario());
                     juegosARemover.add(juego);
                 }
             }
@@ -517,11 +522,21 @@ public class ServidorMulti {
         try {
             int posicion = Integer.parseInt(posStr);
             if (juegoParaMover.realizarMovimiento(cliente, posicion)) {
+                if (juegoParaMover.esEmpate()) {
+                    registrarEmpate(juegoParaMover.getJugadorX().getIdUsuario());
+                    registrarEmpate(juegoParaMover.getJugadorO().getIdUsuario());
+                } else {
+                    UnCliente ganador = juegoParaMover.getGanador();
+                    UnCliente perdedor = juegoParaMover.getOponente(ganador);
+
+                    if (ganador != null) registrarVictoria(ganador.getIdUsuario());
+                    if (perdedor != null) registrarDerrota(perdedor.getIdUsuario());
+                }
                 removerJuego(juegoParaMover);
             }
 
         } catch (NumberFormatException e) {
-            cliente.out.println("La posición '" + posStr + "' no es un número válido (1-9).");
+            cliente.out.println("Error: La posición '" + posStr + "' no es un número válido (1-9).");
         }
     }
 
