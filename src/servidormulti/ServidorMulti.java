@@ -315,7 +315,15 @@ public class ServidorMulti {
         }
         System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size());
         if (cliente.isLogueado()) {
-            difundirMensaje("[Servidor] " + cliente.getUsername() + " ha abandonado el chat.", cliente);
+            String mensajeLog = "[Servidor] " + cliente.getUsername() + " ha abandonado el chat.";
+            registrarMensajeEnArchivo(mensajeLog);
+            synchronized (clientesConectados) {
+                for (UnCliente c : clientesConectados) {
+                    if (c != cliente && !estanBloqueados(cliente.getIdUsuario(), c.getIdUsuario())) {
+                        c.out.println(mensajeLog);
+                    }
+                }
+            }
         }
     }
 
