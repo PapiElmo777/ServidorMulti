@@ -297,6 +297,8 @@ public class ServidorMulti {
 
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
+            String mensajeLog = "[Privado de " + remitente.getUsername() + " para " + usernameDestinatario + "]: " + mensaje;
+            registrarMensajeEnArchivo(mensajeLog);
         } else {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
