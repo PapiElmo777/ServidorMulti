@@ -1,9 +1,6 @@
 package servidormulti;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
@@ -345,6 +342,7 @@ public class ServidorMulti {
         }
         return false;
     }
+    //historial de mensajes
     public synchronized void registrarMensajeEnArchivo(String mensajeFormateado) {
         try (FileWriter fw = new FileWriter(HISTORIAL_CHAT, true);
              BufferedWriter bw = new BufferedWriter(fw);
@@ -356,7 +354,22 @@ public class ServidorMulti {
             System.err.println("Error al escribir en el historial de chat: " + e.getMessage());
         }
     }
-
+    public void enviarHistorial(UnCliente cliente) {
+        File historial = new File(HISTORIAL_CHAT);
+        if (!historial.exists()) {
+            cliente.out.println("(No hay mensajes en el historial todavía.)");
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(historial))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                cliente.out.println(linea);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el historial de chat: " + e.getMessage());
+            cliente.out.println("(Error al cargar el historial.)");
+        }
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
