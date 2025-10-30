@@ -259,6 +259,10 @@ public class ServidorMulti {
     }
 
     public void difundirMensaje(String mensaje, UnCliente remitente) {
+        if (remitente.isLogueado()) {
+            String mensajeLog = remitente.getUsername() + ": " + mensaje;
+            registrarMensajeEnArchivo(mensajeLog);
+        }
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
                 if (cliente != remitente && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
