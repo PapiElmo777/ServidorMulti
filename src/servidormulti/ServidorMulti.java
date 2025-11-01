@@ -22,6 +22,11 @@ public class ServidorMulti {
     private final Map<String, String> propuestasPendientes = Collections.synchronizedMap(new HashMap<>());
     private final List<JuegoGatito> juegosActivos = Collections.synchronizedList(new ArrayList<>());
     private static final String HISTORIAL_CHAT = "historial_chat.txt";
+
+    public List<UnCliente> getClientesConectados() {
+        return clientesConectados;
+    }
+
     public static void main(String[] args) {
         ServidorMulti servidor = new ServidorMulti();
         servidor.iniciarServidor();
@@ -360,7 +365,7 @@ public class ServidorMulti {
     public synchronized void registrarMensajeEnArchivo(String mensajeFormateado) {
         try (FileWriter fw = new FileWriter(HISTORIAL_CHAT, true);
              BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
+             PrintWriter out = new PrintWriter(bw, true)) {
 
             out.println(mensajeFormateado);
 
@@ -369,9 +374,11 @@ public class ServidorMulti {
         }
     }
     public void enviarHistorial(UnCliente cliente) {
+        cliente.out.println("\n--- [ INICIO DEL HISTORIAL DE MENSAJES ] ---");
         File historial = new File(HISTORIAL_CHAT);
         if (!historial.exists()) {
             cliente.out.println("(No hay mensajes en el historial todavía.)");
+            cliente.out.println("--- [ FIN DEL HISTORIAL DE MENSAJES ] ---\n");
             return;
         }
         try (BufferedReader br = new BufferedReader(new FileReader(historial))) {
@@ -383,6 +390,7 @@ public class ServidorMulti {
             System.err.println("Error al leer el historial de chat: " + e.getMessage());
             cliente.out.println("(Error al cargar el historial.)");
         }
+        cliente.out.println("--- [ FIN DEL HISTORIAL DE MENSAJES ] ---\n");
     }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
