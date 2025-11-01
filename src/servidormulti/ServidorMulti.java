@@ -362,12 +362,15 @@ public class ServidorMulti {
         return false;
     }
     //historial de mensajes
-    public synchronized void registrarMensajeEnArchivo(String mensajeFormateado) {
+    public synchronized void registrarMensajeEnArchivo(String tipo, String remitente, String destinatario, String mensaje) {
+        String remitenteSafe = (remitente == null) ? "SYSTEM" : remitente;
+        String destinatarioSafe = (destinatario == null) ? "null" : destinatario;
+        String lineaLog = String.join("|", tipo, remitenteSafe, destinatarioSafe, mensaje);
         try (FileWriter fw = new FileWriter(HISTORIAL_CHAT, true);
              BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw, true)) {
+             PrintWriter out = new PrintWriter(bw, true)) { // true = auto-flush
 
-            out.println(mensajeFormateado);
+            out.println(lineaLog);
 
         } catch (IOException e) {
             System.err.println("Error al escribir en el historial de chat: " + e.getMessage());
