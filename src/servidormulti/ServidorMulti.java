@@ -364,26 +364,21 @@ public class ServidorMulti {
         }
     }
 
+
     public void removerCliente(UnCliente cliente) {
         boolean removido = clientesConectados.remove(cliente);
-
         if (cliente.isLogueado()) {
             forzarFinDeJuego(cliente);
         }
         if (!removido) {
             System.err.println("Advertencia: Se intentó remover un cliente que no estaba en la lista.");
         }
-        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size()); //
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size())
         if (cliente.isLogueado()) {
-            String mensajeLog = "[Servidor] " + cliente.getUsername() + " ha abandonado el chat.";
-            registrarMensajeEnArchivo("SYSTEM", cliente.getUsername(), null, "ha abandonado el chat.");
-            synchronized (clientesConectados) {
-                for (UnCliente c : clientesConectados) {
-                    if (!estanBloqueados(cliente.getIdUsuario(), c.getIdUsuario())) {
-                        c.out.println(mensajeLog);
-                    }
-                }
-            }
+            String msgFormateado = "Servidor: " + cliente.getUsername() + " ha abandonado el chat.";
+            String msgParaOtros = "[Servidor] " + cliente.getUsername() + " ha abandonado el chat.";
+            registrarMensajeEnArchivo(ID_GRUPO_TODOS, msgFormateado);
+            difundirMensajeGrupo(cliente, ID_GRUPO_TODOS, msgParaOtros);
         }
     }
 
@@ -627,6 +622,26 @@ public class ServidorMulti {
             return "Error al listar grupos.";
         }
         return "[Grupos Disponibles] " + String.join(", ", grupos);
+    }
+    public String obtenerCabeceraGrupo(int grupoId, String nombreGrupo) {
+        String sql = "SELECT u.username FROM grupo_miembros gm JOIN usuarios u ON gm.usuario_id = u.id WHERE gm.grupo_id = ?";
+        List<String> miembros = new ArrayList<>();
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, grupoId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                miembros.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("--------------Grupo " + nombreGrupo + "---------------\n");
+        sb.append("--Miembros: " + String.join(", ", miembros) + "\n");
+        sb.append("----------------------------------------------");
+        return sb.toString();
     }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
