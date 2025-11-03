@@ -34,8 +34,9 @@ public class ServidorMulti {
         servidor.iniciarServidor();
     }
     public void iniciarServidor() {
-        inicializarBaseDeDatos();
         new File(CHAT_LOGS_DIR).mkdirs();
+        inicializarBaseDeDatos();
+
 
         System.out.println("Servidor iniciado en el puerto 8080 y conectado a SQLite.");
 
@@ -410,7 +411,6 @@ public class ServidorMulti {
         }
         return false;
     }
-    //historial de mensajes
     public synchronized void registrarMensajeEnArchivo(int grupoId, String mensajeFormateado) {
         String nombreArchivo = CHAT_LOGS_DIR + "/" + grupoId + ".txt";
 
@@ -554,19 +554,38 @@ public class ServidorMulti {
         return "Error al intentar borrar el grupo.";
     }
     public String listarGrupos(UnCliente cliente) {
-        String sql = "SELECT nombre_grupo FROM grupos";
-        List<String> grupos = new ArrayList<>();
+        String sql = "SELECT g.nombre_grupo, gm.usuario_id " +
+                "FROM grupos g " +
+                "LEFT JOIN grupo_miembros gm ON g.grupo_id = gm.grupo_id AND gm.usuario_id = ?";
+
+        List<String> todosLosGrupos = new ArrayList<>();
+        int usuarioId = cliente.getIdUsuario();
+
         try (Connection conn = conexionBD();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, usuarioId);
             ResultSet rs = pstmt.executeQuery();
+
             while (rs.next()) {
-                grupos.add(rs.getString("nombre_grupo"));
+                String nombreGrupo = rs.getString("nombre_grupo");
+                int miembroId = rs.getInt("usuario_id");
+
+                if (miembroId > 0) {
+                    todosLosGrupos.add(nombreGrupo + " (*)");
+                } else {
+                    todosLosGrupos.add(nombreGrupo);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return "Error al listar grupos.";
         }
-        return "[Grupos Disponibles] " + String.join(", ", grupos);
+        StringBuilder sb = new StringBuilder();
+        sb.append("[Grupos Disponibles] (* = Eres miembro)\n");
+        sb.append(String.join(", ", todosLosGrupos));
+
+        return sb.toString();
     }
     public String obtenerCabeceraGrupo(int grupoId, String nombreGrupo) {
         String sql = "SELECT u.username FROM grupo_miembros gm JOIN usuarios u ON gm.usuario_id = u.id WHERE gm.grupo_id = ?";
