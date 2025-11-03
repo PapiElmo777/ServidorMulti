@@ -481,6 +481,19 @@ public class ServidorMulti {
         }
         return -1;
     }
+    private boolean esUsuarioMiembro(int usuarioId, int grupoId) {
+        String sql = "SELECT 1 FROM grupo_miembros WHERE usuario_id = ? AND grupo_id = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            pstmt.setInt(2, grupoId);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
