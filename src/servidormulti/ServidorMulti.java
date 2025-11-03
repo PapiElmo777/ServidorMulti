@@ -21,7 +21,9 @@ public class ServidorMulti {
     private static final String URL_BD = "jdbc:sqlite:usuarios.db";
     private final Map<String, String> propuestasPendientes = Collections.synchronizedMap(new HashMap<>());
     private final List<JuegoGatito> juegosActivos = Collections.synchronizedList(new ArrayList<>());
-    private static final String HISTORIAL_CHAT = "historial_chat.txt";
+    private static final String CHAT_LOGS_DIR = "chat_logs";
+    private static final int ID_GRUPO_TODOS = 1;
+    private static final String NOMBRE_GRUPO_TODOS = "Todos";
 
     public List<UnCliente> getClientesConectados() {
         return clientesConectados;
@@ -33,6 +35,7 @@ public class ServidorMulti {
     }
     public void iniciarServidor() {
         inicializarBaseDeDatos();
+        new File(CHAT_LOGS_DIR).mkdirs();
 
         System.out.println("Servidor iniciado en el puerto 8080 y conectado a SQLite.");
 
