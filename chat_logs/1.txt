@@ -12,3 +12,5 @@ Servidor: adriana se ha unido al chat.
 Servidor: manolo ha abandonado el chat.
 Servidor: adriana se ha unido al chat.
 Servidor: alfredo se ha unido al chat.
+Servidor: adriana se ha unido al chat.
+Servidor: adriana ha abandonado el chat.
