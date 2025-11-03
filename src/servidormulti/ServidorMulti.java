@@ -399,18 +399,17 @@ public class ServidorMulti {
         return false;
     }
     //historial de mensajes
-    public synchronized void registrarMensajeEnArchivo(String tipo, String remitente, String destinatario, String mensaje) {
-        String remitenteSafe = (remitente == null) ? "SYSTEM" : remitente;
-        String destinatarioSafe = (destinatario == null) ? "null" : destinatario;
-        String lineaLog = String.join("|", tipo, remitenteSafe, destinatarioSafe, mensaje);
-        try (FileWriter fw = new FileWriter(HISTORIAL_CHAT, true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw, true)) { // true = auto-flush
+    public synchronized void registrarMensajeEnArchivo(int grupoId, String mensajeFormateado) {
+        String nombreArchivo = CHAT_LOGS_DIR + "/" + grupoId + ".txt";
 
-            out.println(lineaLog);
+        try (FileWriter fw = new FileWriter(nombreArchivo, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw, true)) {
+
+            out.println(mensajeFormateado);
 
         } catch (IOException e) {
-            System.err.println("Error al escribir en el historial de chat: " + e.getMessage());
+            System.err.println("Error al escribir en el log del grupo " + grupoId + ": " + e.getMessage());
         }
     }
     private String formatearMensajeParaCliente(String tipo, String remitente, String destinatario, String mensaje, String miUsername) {
