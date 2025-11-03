@@ -16,6 +16,8 @@ public class UnCliente implements Runnable {
     private String guestUsername;
     private int mensajesComoInvitado = 0;
     private static final int LIMITE_MENSAJES_INVITADO = 3;
+    private int grupoActualId = 1;
+    private String grupoActualNombre = "Todos";
     public UnCliente(Socket socket, ServidorMulti servidor) {
         this.socket = socket;
         this.servidor = servidor;
@@ -30,6 +32,10 @@ public class UnCliente implements Runnable {
     }
     public boolean isLogueado() {
         return this.username != null;
+    }
+    public void setGrupoActual(int id, String nombre) {
+        this.grupoActualId = id;
+        this.grupoActualNombre = nombre;
     }
 
     @Override
