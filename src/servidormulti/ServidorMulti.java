@@ -150,7 +150,7 @@ public class ServidorMulti {
     public boolean registrarUsuario(String username, String password) {
         String sqlInsertUsuario = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
         String sqlInsertRanking = "INSERT INTO ranking(usuario_id, victorias, derrotas, empates, puntaje) VALUES (?, 0, 0, 0, 0)";
-
+        String sqlInsertMiembroTodos = "INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)";
         Connection conn = null;
         try {
             conn = conexionBD();
@@ -172,6 +172,11 @@ public class ServidorMulti {
             try (PreparedStatement pstmtRanking = conn.prepareStatement(sqlInsertRanking)) {
                 pstmtRanking.setLong(1, idUsuario);
                 pstmtRanking.executeUpdate();
+            }
+            try (PreparedStatement pstmtMiembro = conn.prepareStatement(sqlInsertMiembroTodos)) {
+                pstmtMiembro.setInt(1, ID_GRUPO_TODOS);
+                pstmtMiembro.setLong(2, idUsuario);
+                pstmtMiembro.executeUpdate();
             }
             conn.commit();
             return true;
