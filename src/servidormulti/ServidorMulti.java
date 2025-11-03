@@ -265,8 +265,7 @@ public class ServidorMulti {
 
     public void difundirMensaje(String mensaje, UnCliente remitente) {
         if (remitente.isLogueado()) {
-            String mensajeLog = remitente.getUsername() + ": " + mensaje;
-            registrarMensajeEnArchivo(mensajeLog);
+            registrarMensajeEnArchivo("PUBLIC", remitente.getUsername(), null, mensaje);
         }
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
@@ -302,8 +301,7 @@ public class ServidorMulti {
 
         if (clienteDestinatario != null) {
             clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
-            String mensajeLog = "[Privado de " + remitente.getUsername() + " para " + usernameDestinatario + "]: " + mensaje;
-            registrarMensajeEnArchivo(mensajeLog);
+            registrarMensajeEnArchivo("PRIVATE", remitente.getUsername(), usernameDestinatario, mensaje);
         } else {
             remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
         }
