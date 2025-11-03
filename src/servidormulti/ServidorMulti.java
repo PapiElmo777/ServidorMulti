@@ -316,13 +316,13 @@ public class ServidorMulti {
         if (!removido) {
             System.err.println("Advertencia: Se intentó remover un cliente que no estaba en la lista.");
         }
-        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size());
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size()); //
         if (cliente.isLogueado()) {
             String mensajeLog = "[Servidor] " + cliente.getUsername() + " ha abandonado el chat.";
-            registrarMensajeEnArchivo(mensajeLog);
+            registrarMensajeEnArchivo("SYSTEM", cliente.getUsername(), null, "ha abandonado el chat.");
             synchronized (clientesConectados) {
                 for (UnCliente c : clientesConectados) {
-                    if (c != cliente && !estanBloqueados(cliente.getIdUsuario(), c.getIdUsuario())) {
+                    if (!estanBloqueados(cliente.getIdUsuario(), c.getIdUsuario())) {
                         c.out.println(mensajeLog);
                     }
                 }
