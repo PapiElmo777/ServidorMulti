@@ -76,13 +76,11 @@ public class UnCliente implements Runnable {
 
             } else if (servidor.autenticarUsuario(user, pass)) {
                 this.username = user;
-                this.idUsuario = servidor.obtenerIdUsuario(this.username);
-
                 out.println("BIENVENIDO SHAVALON " + this.username);
                 servidor.enviarHistorial(this);
                 enviarMenuAyuda();
                 String msgUnion = "[Servidor] " + this.username + " se ha unido al chat.";
-                servidor.registrarMensajeEnArchivo(msgUnion);
+                servidor.registrarMensajeEnArchivo("SYSTEM", this.username, null, "se ha unido al chat.");
                 synchronized (servidor.getClientesConectados()) {
                     for (UnCliente c : servidor.getClientesConectados()) {
                         if (c != this && !servidor.estanBloqueados(this.idUsuario, c.getIdUsuario())) {
@@ -90,7 +88,6 @@ public class UnCliente implements Runnable {
                         }
                     }
                 }
-
             } else {
                 out.println("Usuario o contraseña incorrectos.");
             }
