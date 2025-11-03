@@ -396,14 +396,33 @@ public class ServidorMulti {
         cliente.out.println("\n--- [ INICIO DEL HISTORIAL DE MENSAJES ] ---");
         File historial = new File(HISTORIAL_CHAT);
         if (!historial.exists()) {
-            cliente.out.println("(No hay mensajes en el historial todavía.)");
+            cliente.out.println("(No hay mensajes en el historial todavía shavalon.)");
             cliente.out.println("--- [ FIN DEL HISTORIAL DE MENSAJES ] ---\n");
             return;
         }
+        String miUsername = cliente.getUsername();
         try (BufferedReader br = new BufferedReader(new FileReader(historial))) {
             String linea;
             while ((linea = br.readLine()) != null) {
-                cliente.out.println(linea);
+                String[] partes = linea.split("\\|", 4);
+                if (partes.length < 4) continue;
+                String tipo = partes[0];
+                String remitente = partes[1];
+                String destinatario = partes[2];
+                String mensaje = partes[3];
+
+                String mensajeFormateado = null;
+                if (tipo.equals("PUBLIC") || tipo.equals("SYSTEM")) {
+                    mensajeFormateado = formatearMensajeParaCliente(tipo, remitente, destinatario, mensaje, miUsername);
+
+                } else if (tipo.equals("PRIVATE")) {
+                    if (miUsername.equals(remitente) || miUsername.equals(destinatario)) {
+                        mensajeFormateado = formatearMensajeParaCliente(tipo, remitente, destinatario, mensaje, miUsername);
+                    }
+                }
+                if (mensajeFormateado != null) {
+                    cliente.out.println(mensajeFormateado);
+                }
             }
         } catch (IOException e) {
             System.err.println("Error al leer el historial de chat: " + e.getMessage());
