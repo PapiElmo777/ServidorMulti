@@ -466,6 +466,21 @@ public class ServidorMulti {
         }
         cliente.out.println("--- [ FIN DEL HISTORIAL DE MENSAJES ] ---\n");
     }
+    //Grupos
+    private int getGrupoIdPorNombre(String nombreGrupo) {
+        String sql = "SELECT grupo_id FROM grupos WHERE nombre_grupo = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombreGrupo);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("grupo_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
