@@ -61,7 +61,7 @@ public class UnCliente implements Runnable {
     private void setupStreams() throws IOException {
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out.println("Conectado. Puedes enviar " + LIMITE_MENSAJES_INVITADO + " mensajes como " + this.guestUsername);
+        out.println("Conectado. Estás en el grupo 'Todos'. Puedes enviar " + LIMITE_MENSAJES_INVITADO + " mensajes como " + this.guestUsername);
         out.println("Usa /registrar <user> <pass> o /login <user> <pass> para chatear sin límites.");
     }
     private void cleanup() {
@@ -82,19 +82,18 @@ public class UnCliente implements Runnable {
 
             } else if (servidor.autenticarUsuario(user, pass)) {
                 this.username = user;
+                this.idUsuario = servidor.obtenerIdUsuario(this.username);
+
                 out.println("BIENVENIDO SHAVALON " + this.username);
-                servidor.enviarHistorial(this);
                 enviarMenuAyuda();
-                String msgUnion = "[Servidor] " + this.username + " se ha unido al chat.";
-                servidor.registrarMensajeEnArchivo("SYSTEM", this.username, null, "se ha unido al chat.");
-                synchronized (servidor.getClientesConectados()) {
-                    for (UnCliente c : servidor.getClientesConectados()) {
-                        if (c != this && !servidor.estanBloqueados(this.idUsuario, c.getIdUsuario())) {
-                            c.out.println(msgUnion);
-                        }
-                    }
-                }
-            } else {
+                out.println("\nCargando grupo 'Todos'...");
+                servidor.cambiarGrupo(this, "Todos");
+                String msgFormateado = "Servidor: " + this.username + " se ha unido al chat.";
+                String msgParaOtros = "[Servidor] " + this.username + " se ha unido al chat.";
+
+                servidor.registrarMensajeEnArchivo(this.grupoActualId, msgFormateado);
+                servidor.difundirMensajeGrupo(this, this.grupoActualId, msgParaOtros);
+            } else{
                 out.println("Usuario o contraseña incorrectos.");
             }
         } else {
