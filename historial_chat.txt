@@ -1,0 +1,21 @@
+SYSTEM|manolo|null|se ha unido al chat.
+SYSTEM|alfredo|null|se ha unido al chat.
+SYSTEM|eide|null|se ha unido al chat.
+SYSTEM|jorge|null|se ha unido al chat.
+PUBLIC|jorge|null|hola perros
+PUBLIC|jorge|null|JAJAJAJA
+PRIVATE|alfredo|jorge|me caen mal todos 
+PRIVATE|eide|alfredo|me caen mal todos 
+PUBLIC|eide|null|estan bien amigos?
+PUBLIC|alfredo|null|al tiro
+PUBLIC|manolo|null|fuera morena
+PUBLIC|jorge|null|fuera la presidenta
+SYSTEM|eide|null|ha abandonado el chat.
+SYSTEM|emmanuel|null|se ha unido al chat.
+SYSTEM|emmanuel|null|ha abandonado el chat.
+SYSTEM|jorge|null|ha abandonado el chat.
+SYSTEM|alfredo|null|ha abandonado el chat.
+SYSTEM|emmanuel|null|se ha unido al chat.
+SYSTEM|alfredo|null|se ha unido al chat.
+SYSTEM|emmanuel|null|se ha unido al chat.
+SYSTEM|emmanuel|null|ha abandonado el chat.
