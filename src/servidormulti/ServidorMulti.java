@@ -643,6 +643,43 @@ public class ServidorMulti {
         sb.append("----------------------------------------------");
         return sb.toString();
     }
+    public void cambiarGrupo(UnCliente cliente, String nombreGrupo) {
+        int grupoId = getGrupoIdPorNombre(nombreGrupo);
+        if (grupoId == -1) {
+            cliente.out.println("El grupo '" + nombreGrupo + "' no existe.");
+            return;
+        }
+        if (!esUsuarioMiembro(cliente.getIdUsuario(), grupoId)) {
+            cliente.out.println("No eres miembro de '" + nombreGrupo + "'. Usa /unirse-grupo " + nombreGrupo);
+            return;
+        }
+        cliente.setGrupoActual(grupoId, nombreGrupo);
+        cliente.out.println("\n" + obtenerCabeceraGrupo(grupoId, nombreGrupo));
+        enviarHistorialCompletoDelGrupo(cliente, grupoId);
+    }
+
+    public void enviarHistorialCompletoDelGrupo(UnCliente cliente, int grupoId) {
+        String nombreArchivo = CHAT_LOGS_DIR + "/" + grupoId + ".txt";
+        boolean hayMensajes = false;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(nombreArchivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                hayMensajes = true;
+                cliente.out.println(linea);
+            }
+        } catch (IOException e) {
+            if (!(e instanceof java.io.FileNotFoundException)) {
+                e.printStackTrace();
+                cliente.out.println("Error al cargar historial del grupo");
+            }
+        }
+        if(hayMensajes) {
+            cliente.out.println("----------------------------------------------");
+        } else {
+            cliente.out.println("(No hay mensajes en este grupo)");
+        }
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
