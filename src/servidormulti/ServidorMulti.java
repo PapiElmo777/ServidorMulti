@@ -595,6 +595,21 @@ public class ServidorMulti {
         }
         return "Error al intentar borrar el grupo.";
     }
+    public String listarGrupos(UnCliente cliente) {
+        String sql = "SELECT nombre_grupo FROM grupos";
+        List<String> grupos = new ArrayList<>();
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                grupos.add(rs.getString("nombre_grupo"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Error al listar grupos.";
+        }
+        return "[Grupos Disponibles] " + String.join(", ", grupos);
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
