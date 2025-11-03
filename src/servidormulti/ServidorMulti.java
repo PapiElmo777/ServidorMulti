@@ -494,6 +494,52 @@ public class ServidorMulti {
         }
         return false;
     }
+    public String crearGrupo(UnCliente creador, String nombreGrupo) {
+        if (nombreGrupo.equalsIgnoreCase(NOMBRE_GRUPO_TODOS) || nombreGrupo.contains("|") || nombreGrupo.isEmpty()) {
+            return "Shavalon, nombre de grupo no válido.";
+        }
+        if (getGrupoIdPorNombre(nombreGrupo) != -1) {
+            return "Shavalon, el grupo '" + nombreGrupo + "' ya existe.";
+        }
+
+        String sqlInsertGrupo = "INSERT INTO grupos (nombre_grupo, creador_id) VALUES (?, ?)";
+        String sqlInsertMiembro = "INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)";
+
+        Connection conn = null;
+        try {
+            conn = conexionBD();
+            conn.setAutoCommit(false);
+            long grupoId = -1;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertGrupo, Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setString(1, nombreGrupo);
+                pstmt.setInt(2, creador.getIdUsuario());
+                pstmt.executeUpdate();
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) {
+                    grupoId = rs.getLong(1);
+                }
+            }
+            if (grupoId == -1) {
+                conn.rollback();
+                return "Error al crear el grupo.";
+            }
+            File logGrupo = new File(CHAT_LOGS_DIR + "/" + grupoId + ".txt");
+            logGrupo.createNewFile();
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertMiembro)) {
+                pstmt.setLong(1, grupoId);
+                pstmt.setInt(2, creador.getIdUsuario());
+                pstmt.executeUpdate();
+            }
+            conn.commit();
+            return "¡Grupo '" + nombreGrupo + "' creado! Usa /grupo " + nombreGrupo + " para unirte.";
+        } catch (SQLException | IOException e) {
+            if (conn != null) { try { conn.rollback(); } catch (SQLException ex) {}}
+            e.printStackTrace();
+            return "Error en la base de datos o archivos al crear el grupo.";
+        } finally {
+            if (conn != null) { try { conn.close(); } catch (SQLException ex) {}}
+        }
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
