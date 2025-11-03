@@ -206,7 +206,40 @@ public class UnCliente implements Runnable {
         return servidor.contarJuegosActivos(this);
     }
     private boolean procesarMensajeLogueado(String mensaje) {
-        if (mensaje.startsWith("/bloquear ")) {
+        if (mensaje.startsWith("/crear-grupo ")) {
+            String[] partes = mensaje.split(" ", 2);
+            if (partes.length == 2) {
+                out.println(servidor.crearGrupo(this, partes[1]));
+            } else {
+                out.println("Usa /crear-grupo <nombre-grupo>");
+            }
+        } else if (mensaje.startsWith("/unirse-grupo ")) {
+            String[] partes = mensaje.split(" ", 2);
+            if (partes.length == 2) {
+                out.println(servidor.unirseGrupo(this, partes[1]));
+            } else {
+                out.println("Usa /unirse-grupo <nombre-grupo>");
+            }
+        } else if (mensaje.startsWith("/borrar-grupo ")) {
+            String[] partes = mensaje.split(" ", 2);
+            if (partes.length == 2) {
+                out.println(servidor.borrarGrupo(this, partes[1]));
+            } else {
+                out.println("Usa /borrar-grupo <nombre-grupo>");
+            }
+        } else if (mensaje.startsWith("/grupo ")) {
+            String[] partes = mensaje.split(" ", 2);
+            if (partes.length == 2) {
+                servidor.cambiarGrupo(this, partes[1]);
+            } else {
+                out.println("Usa /grupo <nombre-grupo> para cambiar de chat.");
+            }
+        } else if (mensaje.equals("/lista-grupos")) {
+            out.println(servidor.listarGrupos(this));
+        } else if (mensaje.equals("/miembros")) {
+            out.println(servidor.obtenerCabeceraGrupo(this.grupoActualId, this.grupoActualNombre));
+        }
+        else if (mensaje.startsWith("/bloquear ")) {
             handleBloquear(mensaje);
         } else if (mensaje.startsWith("/desbloquear ")) {
             handleDesbloquear(mensaje);
@@ -236,12 +269,23 @@ public class UnCliente implements Runnable {
         } else if (mensaje.startsWith("/")) {
             out.println("Comando no reconocido. Escribe /ayuda para ver la lista.");
         } else {
-            servidor.difundirMensaje(mensaje, this);
+            String msgFormateado = this.username + ": " + mensaje;
+            servidor.registrarMensajeEnArchivo(this.grupoActualId, msgFormateado);
+            servidor.difundirMensajeGrupo(this, this.grupoActualId, msgFormateado);
         }
         return false;
     }
     private void enviarMenuAyuda() {
         out.println("--- MENU DE AYUDA SHAVALON---");
+        out.println("--- GRUPOS ---");
+        out.println(" * (Cualquier mensaje)          (Envía un mensaje a tu grupo actual.)");
+        out.println(" * /grupo <nombre>              (Cambia tu chat al grupo especificado.)");
+        out.println(" * /crear-grupo <nombre>        (Crea un nuevo grupo.)");
+        out.println(" * /unirse-grupo <nombre>       (Te une a un grupo existente.)");
+        out.println(" * /borrar-grupo <nombre>       (Borra un grupo si eres el creador.)");
+        out.println(" * /lista-grupos                (Muestra todos los grupos.)");
+        out.println(" * /miembros                    (Muestra los miembros de tu grupo actual.)");
+        out.println("--- CHAT 1-A-1 ---");
         out.println(" * /privado <usuario> <mensaje> (Envia un mensaje privado.)");
         out.println(" * /bloquear <usuario>          (Bloquea a un usuario.)");
         out.println(" * /desbloquear <usuario>       (Desbloquea a un usuario.)");
@@ -257,7 +301,6 @@ public class UnCliente implements Runnable {
         out.println("--- GENERAL ---");
         out.println(" * /ayuda                       (Muestra este menu.)");
         out.println(" * /adios                       (Desconectarse del chat. Pierdes si estás jugando.)");
-        out.println(" * (Escribe cualquier otra cosa para un mensaje público)");
         out.println("-------------------------");
     }
 }
