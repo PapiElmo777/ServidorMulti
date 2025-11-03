@@ -115,7 +115,7 @@ public class UnCliente implements Runnable {
     private void handleMensajeInvitado(String mensaje) {
         if (mensajesComoInvitado < LIMITE_MENSAJES_INVITADO) {
             mensajesComoInvitado++;
-            servidor.difundirMensaje(mensaje, this);
+            servidor.difundirMensajeInvitado(mensaje, this);
             out.println("[Mensaje " + mensajesComoInvitado + "/" + LIMITE_MENSAJES_INVITADO + " como " + this.guestUsername + "].");
         } else {
             out.println("Límite de " + LIMITE_MENSAJES_INVITADO + " mensajes de invitado alcanzado.");
