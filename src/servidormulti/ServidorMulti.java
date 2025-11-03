@@ -328,6 +328,10 @@ public class ServidorMulti {
             }
         }
     }
+    public void difundirMensajeInvitado(String mensaje, UnCliente remitente) {
+        String msgFormateado = remitente.getUsername() + ": " + mensaje;
+        difundirMensajeGrupo(remitente, ID_GRUPO_TODOS, msgFormateado);
+    }
 
     public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
         if (!existeUsuario(usernameDestinatario)) {
