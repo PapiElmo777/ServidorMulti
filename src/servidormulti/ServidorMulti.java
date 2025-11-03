@@ -60,8 +60,8 @@ public class ServidorMulti {
                 "    bloqueador_id INTEGER NOT NULL," +
                 "    bloqueado_id INTEGER NOT NULL," +
                 "    PRIMARY KEY (bloqueador_id, bloqueado_id)," +
-                "    FOREIGN KEY (bloqueador_id) REFERENCES usuarios(id)," +
-                "    FOREIGN KEY (bloqueado_id) REFERENCES usuarios(id)" +
+                "    FOREIGN KEY (bloqueador_id) REFERENCES usuarios(id) ON DELETE CASCADE," +
+                "    FOREIGN KEY (bloqueado_id) REFERENCES usuarios(id) ON DELETE CASCADE" +
                 ");";
         String sqlCreateTableRanking = "CREATE TABLE IF NOT EXISTS ranking (" +
                 "    usuario_id INTEGER PRIMARY KEY," +
@@ -71,22 +71,53 @@ public class ServidorMulti {
                 "    puntaje INTEGER NOT NULL DEFAULT 0," +
                 "    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE" +
                 ");";
+        String sqlCreateTableGrupos = "CREATE TABLE IF NOT EXISTS grupos (" +
+                "    grupo_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "    nombre_grupo VARCHAR(25) NOT NULL UNIQUE," +
+                "    creador_id INTEGER," +
+                "    es_borrable INTEGER NOT NULL DEFAULT 1," +
+                "    FOREIGN KEY (creador_id) REFERENCES usuarios(id) ON DELETE SET NULL" +
+                ");";
+
+        String sqlCreateTableGrupoMiembros = "CREATE TABLE IF NOT EXISTS grupo_miembros (" +
+                "    grupo_id INTEGER NOT NULL," +
+                "    usuario_id INTEGER NOT NULL," +
+                "    PRIMARY KEY (grupo_id, usuario_id)," +
+                "    FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE CASCADE," +
+                "    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE" +
+                ");";
 
         try {
             Class.forName("org.sqlite.JDBC");
-
             try (Connection conn = conexionBD();
                  Statement stmt = conn.createStatement()) {
+
                 stmt.execute(sqlCreateTableUsuarios);
                 stmt.execute(sqlCreateTableBloqueados);
                 stmt.execute(sqlCreateTableRanking);
-                System.out.println("Base de datos SQLite y tablas 'usuarios' y 'bloqueados' listas.");
+                stmt.execute(sqlCreateTableGrupos);
+                stmt.execute(sqlCreateTableGrupoMiembros);
 
-            } catch (SQLException e) {
-                System.err.println("No se pudo inicializar la base de datos: " + e.getMessage());
+                String sqlInsertTodos = "INSERT OR IGNORE INTO grupos (grupo_id, nombre_grupo, creador_id, es_borrable) " +
+                        "VALUES (?, ?, NULL, 0);";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertTodos)) {
+                    pstmt.setInt(1, ID_GRUPO_TODOS);
+                    pstmt.setString(2, NOMBRE_GRUPO_TODOS);
+                    pstmt.execute();
+                }
+                File logTodos = new File(CHAT_LOGS_DIR + "/" + ID_GRUPO_TODOS + ".txt");
+                if (logTodos.createNewFile()) {
+                    System.out.println("Archivo de log para 'Todos' creado.");
+                } else {
+                    System.out.println("Archivo de log para 'Todos' ya existía.");
+                }
+
+                System.out.println("Base de datos SQLite y tablas de grupos listas.");
+
+            } catch (SQLException | IOException e) {
+                System.err.println("No se pudo inicializar la base de datos o los logs: " + e.getMessage());
                 System.exit(1);
             }
-
         } catch (ClassNotFoundException e) {
             System.err.println("Error CRÍTICO: No se encontró la clase del driver de SQLite.");
             e.printStackTrace();
