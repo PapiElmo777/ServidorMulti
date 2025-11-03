@@ -540,6 +540,61 @@ public class ServidorMulti {
             if (conn != null) { try { conn.close(); } catch (SQLException ex) {}}
         }
     }
+    public String unirseGrupo(UnCliente cliente, String nombreGrupo) {
+        int grupoId = getGrupoIdPorNombre(nombreGrupo);
+        if (grupoId == -1) {
+            return "El grupo '" + nombreGrupo + "' no existe.";
+        }
+        if (esUsuarioMiembro(cliente.getIdUsuario(), grupoId)) {
+            return "Shavalon, ya estás en el grupo '" + nombreGrupo + "'.";
+        }
+        String sqlInsertMiembro = "INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmtMiembro = conn.prepareStatement(sqlInsertMiembro)) {
+            pstmtMiembro.setInt(1, grupoId);
+            pstmtMiembro.setInt(2, cliente.getIdUsuario());
+            pstmtMiembro.executeUpdate();
+            return "Te has unido al grupo '" + nombreGrupo + "'. Usa /grupo " + nombreGrupo + " para hablar.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Error al unirse al grupo.";
+        }
+    }
+    public String borrarGrupo(UnCliente cliente, String nombreGrupo) {
+        int grupoId = getGrupoIdPorNombre(nombreGrupo);
+        if (grupoId == -1) {
+            return "El grupo '" + nombreGrupo + "' no existe.";
+        }
+        String sql = "SELECT creador_id, es_borrable FROM grupos WHERE grupo_id = ?";
+        try (Connection conn = conexionBD()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, grupoId);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    if (rs.getInt("es_borrable") == 0) {
+                        return "Shavalon, no puedes borrar el grupo '" + nombreGrupo + "'.";
+                    }
+                    if (rs.getInt("creador_id") != cliente.getIdUsuario()) {
+                        return "No eres el creador de este grupo.";
+                    }
+                    File logGrupo = new File(CHAT_LOGS_DIR + "/" + grupoId + ".txt");
+                    if (!logGrupo.delete()) {
+                        System.err.println("Advertencia: No se pudo borrar el archivo " + logGrupo.getName());
+                    }
+                    String sqlDelete = "DELETE FROM grupos WHERE grupo_id = ?";
+                    try (PreparedStatement pstmtDelete = conn.prepareStatement(sqlDelete)) {
+                        pstmtDelete.setInt(1, grupoId);
+                        pstmtDelete.executeUpdate();
+                        return "Grupo '" + nombreGrupo + "' y su historial borrados.";
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Error al intentar borrar el grupo.";
+    }
     //juego gato
     private UnCliente obtenerClientePorUsername(String username) {
         synchronized (clientesConectados) {
