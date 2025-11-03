@@ -376,6 +376,22 @@ public class ServidorMulti {
             System.err.println("Error al escribir en el historial de chat: " + e.getMessage());
         }
     }
+    private String formatearMensajeParaCliente(String tipo, String remitente, String destinatario, String mensaje, String miUsername) {
+        switch (tipo) {
+            case "PUBLIC":
+                return remitente + ": " + mensaje;
+            case "SYSTEM":
+                return "[Servidor] " + remitente + " " + mensaje;
+            case "PRIVATE":
+                if (miUsername.equals(remitente)) {
+                    return "[Privado para " + destinatario + "]: " + mensaje;
+                } else {
+                    return "[Privado de " + remitente + "]: " + mensaje;
+                }
+            default:
+                return null;
+        }
+    }
     public void enviarHistorial(UnCliente cliente) {
         cliente.out.println("\n--- [ INICIO DEL HISTORIAL DE MENSAJES ] ---");
         File historial = new File(HISTORIAL_CHAT);
