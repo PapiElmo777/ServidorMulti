@@ -302,14 +302,28 @@ public class ServidorMulti {
         }
     }
 
-    public void difundirMensaje(String mensaje, UnCliente remitente) {
-        if (remitente.isLogueado()) {
-            registrarMensajeEnArchivo("PUBLIC", remitente.getUsername(), null, mensaje);
+    public void difundirMensajeGrupo(UnCliente remitente, int grupoId, String mensajeFormateado) {
+        String sql = "SELECT usuario_id FROM grupo_miembros WHERE grupo_id = ?";
+        List<Integer> idsMiembros = new ArrayList<>();
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, grupoId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                idsMiembros.add(rs.getInt("usuario_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
         }
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
-                if (cliente != remitente && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
-                    cliente.out.println(remitente.getUsername() + ": " + mensaje);
+                if (cliente != remitente && cliente.isLogueado() && idsMiembros.contains(cliente.getIdUsuario())) {
+                    if (remitente.isLogueado() && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
+                        cliente.out.println(mensajeFormateado);
+                    } else if (!remitente.isLogueado()) {
+                        cliente.out.println(mensajeFormateado);
+                    }
                 }
             }
         }
