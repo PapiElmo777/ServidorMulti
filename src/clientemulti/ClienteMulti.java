@@ -16,6 +16,7 @@ public class ClienteMulti {
         hiloParaRecibir.start();
     }
 
+
    /* Terminal
    cd /Users/alfredojimenez/IdeaProjects/ServidorMulti/out/production/ServidorMulti/
    java clientemulti.ClienteMulti

@@ -323,10 +323,19 @@ public class ServidorMulti {
         }
         synchronized (clientesConectados) {
             for (UnCliente cliente : clientesConectados) {
-                if (cliente != remitente && cliente.isLogueado() && idsMiembros.contains(cliente.getIdUsuario())) {
-                    if (remitente.isLogueado() && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
+                if (cliente == remitente) {
+                    continue;
+                }
+                if (!cliente.isLogueado()) {
+                    if (grupoId == ID_GRUPO_TODOS) {
                         cliente.out.println(mensajeFormateado);
-                    } else if (!remitente.isLogueado()) {
+                    }
+                }
+                else if (cliente.isLogueado() && idsMiembros.contains(cliente.getIdUsuario())) {
+                    if (!remitente.isLogueado()) {
+                        cliente.out.println(mensajeFormateado);
+                    }
+                    else if (remitente.isLogueado() && !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
                         cliente.out.println(mensajeFormateado);
                     }
                 }
