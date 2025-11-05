@@ -19,5 +19,7 @@ public class ClienteMulti {
    /* Terminal
    cd /Users/alfredojimenez/IdeaProjects/ServidorMulti/out/production/ServidorMulti/
    java clientemulti.ClienteMulti
+   ip
+   ifconfig | grep "inet "
     */
 }

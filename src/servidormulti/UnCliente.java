@@ -21,7 +21,7 @@ public class UnCliente implements Runnable {
     public UnCliente(Socket socket, ServidorMulti servidor) {
         this.socket = socket;
         this.servidor = servidor;
-        this.guestUsername = "Invitado-" + socket.getPort();
+        this.guestUsername = "Invitado " + servidor.getSiguienteNumeroInvitado();
     }
     public String getUsername() {
         return (this.username != null) ? this.username : this.guestUsername;
@@ -129,6 +129,12 @@ public class UnCliente implements Runnable {
             handleRegistro(mensaje);
         } else if (mensaje.startsWith("/")) {
             out.println("Comando no disponible para invitados. Debes usar /login o /registrar.");
+            mensajesComoInvitado++;
+            out.println("[Mensaje " + mensajesComoInvitado + "/" + LIMITE_MENSAJES_INVITADO + " como " + this.guestUsername + "].");
+            if (mensajesComoInvitado == 3){
+                out.println("Límite de " + LIMITE_MENSAJES_INVITADO + " mensajes de invitado alcanzado.");
+                out.println("Usa /registrar <user> <pass> o /login <user> <pass>");
+            }
         } else {
             handleMensajeInvitado(mensaje);
         }

@@ -24,7 +24,7 @@ public class ServidorMulti {
     private static final String CHAT_LOGS_DIR = "chat_logs";
     private static final int ID_GRUPO_TODOS = 1;
     private static final String NOMBRE_GRUPO_TODOS = "Todos";
-
+    private int contadorInvitados = 0;
     public List<UnCliente> getClientesConectados() {
         return clientesConectados;
     }
@@ -128,6 +128,10 @@ public class ServidorMulti {
 
     private static Connection conexionBD() throws SQLException {
         return DriverManager.getConnection(URL_BD);
+    }
+    public synchronized int getSiguienteNumeroInvitado() {
+        contadorInvitados++;
+        return contadorInvitados;
     }
 
     public boolean autenticarUsuario(String username, String password) {
