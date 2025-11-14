@@ -103,10 +103,20 @@ public class UnCliente implements Runnable {
     private void handleRegistro(String mensaje) {
         String[] partes = mensaje.split(" ", 3);
         if (partes.length == 3) {
-            if (servidor.registrarUsuario(partes[1], partes[2])) {
-                out.println("Bienvenido Shavalon. Ahora puedes usar /login " + partes[1] + " <pass>");
+            String userParaRegistrar = partes[1];
+            String passParaRegistrar = partes[2];
+            if (userParaRegistrar == null || userParaRegistrar.trim().isEmpty()) {
+                out.println("Shavalon, no puedes registrar un usuario vacio.");
+                return;
+            }
+            if (userParaRegistrar.startsWith("/")) {
+                out.println("Shavalon, no puedes registrar un comando como usuario.");
+                return;
+            }
+            if (servidor.registrarUsuario(userParaRegistrar, passParaRegistrar)) {
+                out.println("Bienvenido Shavalon. Ahora puedes usar /login " + userParaRegistrar + " <pass>");
             } else {
-                out.println("Error: El usuario ya existe o hubo un error.");
+                out.println("Error: El usuario '" + userParaRegistrar + "' ya existe.");
             }
         } else {
             out.println("Error: Formato incorrecto. Usa /registrar <user> <pass>");
