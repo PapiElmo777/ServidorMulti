@@ -22,7 +22,7 @@ public class ParaMandar implements Runnable {
                 salida.println(mensaje);
             }
         } catch (IOException ex) {
-            System.out.println("Error al enviar mensaje: " + ex.getMessage());
+            System.out.println("Se te fue el wifi campeon, te desconectaste");
         }
     }
 }
