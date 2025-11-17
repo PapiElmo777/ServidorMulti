@@ -30,6 +30,9 @@ public class UnCliente implements Runnable {
     public int getIdUsuario() {
         return idUsuario;
     }
+    public int getGrupoActualId() {
+        return this.grupoActualId;
+    }
     public boolean isLogueado() {
         return this.username != null;
     }
