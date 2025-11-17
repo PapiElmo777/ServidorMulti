@@ -692,6 +692,10 @@ public class ServidorMulti {
             proponente.out.println("El shavalon '" + oponenteUsername + "' no está conectado en este momento.");
             return;
         }
+        if (proponente.getGrupoActualId() != oponente.getGrupoActualId()) {
+            proponente.out.println("El shavalon '" + oponenteUsername + "' no está en tu grupo actual.");
+            return;
+        }
         if (estanBloqueados(proponente.getIdUsuario(), oponente.getIdUsuario())) {
             proponente.out.println("Shavalon, no puedes juagar con '" + oponenteUsername + "' porque estan enojados.");
             return;
