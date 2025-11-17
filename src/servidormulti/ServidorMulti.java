@@ -331,7 +331,7 @@ public class ServidorMulti {
                         cliente.out.println(mensajeFormateado);
                     }
                 }
-                else if (cliente.isLogueado() && idsMiembros.contains(cliente.getIdUsuario())) {
+                else if (cliente.isLogueado() && idsMiembros.contains(cliente.getIdUsuario()) && cliente.getGrupoActualId() == grupoId) {
                     if (!remitente.isLogueado()) {
                         cliente.out.println(mensajeFormateado);
                     }
