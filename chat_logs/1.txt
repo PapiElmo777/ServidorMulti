@@ -28,3 +28,8 @@ marulete: se me fue eo wifi
 Servidor: eide se ha unido al chat.
 Servidor: marulete se ha unido al chat.
 Servidor: eide ha abandonado el chat.
+Servidor: eide se ha unido al chat.
+Servidor: manolito se ha unido al chat.
+Servidor: marulete se ha unido al chat.
+Servidor: marulete ha abandonado el chat.
+Servidor: manolito ha abandonado el chat.
