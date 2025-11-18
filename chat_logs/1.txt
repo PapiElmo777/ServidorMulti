@@ -33,3 +33,5 @@ Servidor: manolito se ha unido al chat.
 Servidor: marulete se ha unido al chat.
 Servidor: marulete ha abandonado el chat.
 Servidor: manolito ha abandonado el chat.
+Servidor: marulete se ha unido al chat.
+Servidor: marulete ha abandonado el chat.
