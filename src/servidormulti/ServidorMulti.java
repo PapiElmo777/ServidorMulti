@@ -101,6 +101,90 @@ public class ServidorMulti {
         }
     }
 
+    public boolean autenticarUsuario(String username, String password) {
+        String sql = "SELECT password FROM usuarios WHERE username = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next() && rs.getString("password").equals(password);
+
+        } catch (SQLException e) {
+            System.err.println("Error al autenticar: " + e.getMessage());
+            return false;
+        }
+    }
+    public boolean registrarUsuario(String username, String password) {
+        Connection conn = null;
+        try {
+            conn = conexionBD();
+            conn.setAutoCommit(false);
+            long idUsuario = ejecutarRegistroTransaccion(conn, username, password);
+            if (idUsuario == -1) {
+                conn.rollback();
+                return false;
+            }
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try { if (conn != null) conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (e.getErrorCode() == 19) return false;
+            e.printStackTrace();
+            return false;
+        } finally {
+            cerrarConexion(conn);
+        }
+    }
+    private long ejecutarRegistroTransaccion(Connection conn, String username, String password) throws SQLException {
+        long idUsuario = insertarUsuario(conn, username, password);
+        if (idUsuario == -1) return -1;
+        insertarRanking(conn, idUsuario);
+        insertarMiembroTodos(conn, idUsuario);
+        return idUsuario;
+    }
+    private long insertarUsuario(Connection conn, String username, String password) throws SQLException {
+        String sql = "INSERT INTO usuarios(username, password) VALUES(?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.executeUpdate();
+            ResultSet rs = pstmt.getGeneratedKeys();
+            return rs.next() ? rs.getLong(1) : -1;
+        }
+    }
+    private void insertarRanking(Connection conn, long idUsuario) throws SQLException {
+        String sql = "INSERT INTO ranking(usuario_id, victorias, derrotas, empates, puntaje) VALUES (?, 0, 0, 0, 0)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, idUsuario);
+            pstmt.executeUpdate();
+        }
+    }
+    private void insertarMiembroTodos(Connection conn, long idUsuario) throws SQLException {
+        String sql = "INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, Configuracion.ID_GRUPO_TODOS);
+            pstmt.setLong(2, idUsuario);
+            pstmt.executeUpdate();
+        }
+    }
+    public int obtenerIdUsuario(String username) {
+        String sql = "SELECT id FROM usuarios WHERE username = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt("id") : -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    public boolean existeUsuario(String username) {
+        return obtenerIdUsuario(username) != -1;
+    }
+
 public class ServidrMulti {
 
     private final List<UnCliente> clientesConectados = Collections.synchronizedList(new ArrayList<>());
