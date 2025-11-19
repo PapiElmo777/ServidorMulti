@@ -18,6 +18,49 @@ import java.util.Map;
 public class ServidorMulti {
 
     private final List<UnCliente> clientesConectados = Collections.synchronizedList(new ArrayList<>());
+    private final Map<String, String> propuestasPendientes = Collections.synchronizedMap(new HashMap<>());
+    private final List<JuegoGatito> juegosActivos = Collections.synchronizedList(new ArrayList<>());
+    private int contadorInvitados = 0;
+    private static Connection conexionBD() throws SQLException {
+        return DriverManager.getConnection(Configuracion.URL_BD);
+    }
+    public synchronized int getSiguienteNumeroInvitado() {
+        return ++contadorInvitados;
+    }
+    public List<UnCliente> getClientesConectados() {
+        return clientesConectados;
+    }
+    private void cerrarConexion(Connection conn) {
+        if (conn != null) {
+            try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+    public static void main(String[] args) {
+        new ServidorMulti().iniciarServidor();
+    }
+    public void iniciarServidor() {
+        inicializarBaseDeDatos();
+        System.out.println("Servidor iniciado en el puerto " + Configuracion.PUERTO_SERVIDOR + " y conectado a SQLite.");
+
+        try (ServerSocket serverSocket = new ServerSocket(Configuracion.PUERTO_SERVIDOR)) {
+            aceptarConexiones(serverSocket);
+        } catch (IOException e) {
+            System.err.println("Error en el servidor: " + e.getMessage());
+        }
+    }
+
+    private void aceptarConexiones(ServerSocket serverSocket) throws IOException {
+        while (true) {
+            Socket socket = serverSocket.accept();
+            UnCliente nuevoCliente = new UnCliente(socket, this);
+            clientesConectados.add(nuevoCliente);
+            new Thread(nuevoCliente).start();
+        }
+    }
+
+public class ServidrMulti {
+
+    private final List<UnCliente> clientesConectados = Collections.synchronizedList(new ArrayList<>());
     private static final String URL_BD = "jdbc:sqlite:usuarios.db";
     private final Map<String, String> propuestasPendientes = Collections.synchronizedMap(new HashMap<>());
     private final List<JuegoGatito> juegosActivos = Collections.synchronizedList(new ArrayList<>());
