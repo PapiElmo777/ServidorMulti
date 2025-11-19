@@ -35,3 +35,15 @@ Servidor: marulete ha abandonado el chat.
 Servidor: manolito ha abandonado el chat.
 Servidor: marulete se ha unido al chat.
 Servidor: marulete ha abandonado el chat.
+Servidor: cañeros se ha unido al chat.
+Servidor: eide se ha unido al chat.
+Servidor: marulete se ha unido al chat.
+marulete: ssss
+eide: cccc
+cañeros: fff
+Servidor: marulete ha abandonado el chat.
+Servidor: manolito se ha unido al chat.
+manolito: hola
+eide: jol
+Servidor: cañeros ha abandonado el chat.
+Servidor: eide ha abandonado el chat.
