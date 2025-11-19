@@ -900,4 +900,5 @@ public class ServidorMulti {
 
         solicitante.out.println(comparativa);
     }
+
 }
