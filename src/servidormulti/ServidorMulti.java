@@ -257,6 +257,117 @@ public class ServidorMulti {
         }
     }
 
+    public void difundirMensajeGrupo(UnCliente remitente, int grupoId, String mensajeFormateado) {
+        List<Integer> idsMiembros = obtenerIdsMiembrosGrupo(grupoId);
+
+        synchronized (clientesConectados) {
+            for (UnCliente cliente : clientesConectados) {
+                enviarMensajeACliente(cliente, remitente, grupoId, mensajeFormateado, idsMiembros);
+            }
+        }
+    }
+    private List<Integer> obtenerIdsMiembrosGrupo(int grupoId) {
+        String sql = "SELECT usuario_id FROM grupo_miembros WHERE grupo_id = ?";
+        List<Integer> idsMiembros = new ArrayList<>();
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, grupoId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) idsMiembros.add(rs.getInt("usuario_id"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return idsMiembros;
+    }
+    private void enviarMensajeACliente(UnCliente cliente, UnCliente remitente, int grupoId, String mensaje, List<Integer> idsMiembros) {
+        if (cliente == remitente) return;
+
+        boolean isMiembro = idsMiembros.contains(cliente.getIdUsuario());
+
+        if (!cliente.isLogueado()) {
+            if (grupoId == Configuracion.ID_GRUPO_TODOS) cliente.out.println(mensaje);
+        } else if (isMiembro && cliente.getGrupoActualId() == grupoId) {
+            if (!remitente.isLogueado() || !estanBloqueados(remitente.getIdUsuario(), cliente.getIdUsuario())) {
+                cliente.out.println(mensaje);
+            }
+        }
+    }
+    public void difundirMensajeInvitado(String mensaje, UnCliente remitente) {
+        String msgFormateado = remitente.getUsername() + ": " + mensaje;
+        difundirMensajeGrupo(remitente, Configuracion.ID_GRUPO_TODOS, msgFormateado);
+    }
+    public void enviarMensajePrivado(String mensaje, UnCliente remitente, String usernameDestinatario) {
+        if (!existeUsuario(usernameDestinatario)) {
+            remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no existe.");
+            return;
+        }
+        int idDestinatario = obtenerIdUsuario(usernameDestinatario);
+        if (estanBloqueados(remitente.getIdUsuario(), idDestinatario)) {
+            remitente.out.println("Shavalon no puedes enviar mensajes a '" + usernameDestinatario + "' (Estan enojados).");
+            return;
+        }
+        UnCliente clienteDestinatario = obtenerClientePorUsername(usernameDestinatario);
+        if (clienteDestinatario != null) {
+            clienteDestinatario.out.println("[Privado de " + remitente.getUsername() + "]: " + mensaje);
+        } else {
+            remitente.out.println("Shavalon el usuario '" + usernameDestinatario + "' no está conectado.");
+        }
+    }
+    public void removerCliente(UnCliente cliente) {
+        boolean removido = clientesConectados.remove(cliente);
+        if (cliente.isLogueado()) {
+            forzarFinDeJuego(cliente);
+        }
+        if (!removido) {
+            System.err.println("Advertencia: Se intentó remover un cliente que no estaba en la lista.");
+        }
+        System.out.println("Cliente " + cliente.getUsername() + " desconectado. Clientes restantes: " + clientesConectados.size());
+        if (cliente.isLogueado()) {
+            notificarDesconexion(cliente);
+        }
+    }
+    private void notificarDesconexion(UnCliente cliente) {
+        String msgFormateado = "Servidor: " + cliente.getUsername() + " ha abandonado el chat.";
+        String msgParaOtros = "[Servidor] " + cliente.getUsername() + " ha abandonado el chat.";
+        registrarMensajeEnArchivo(Configuracion.ID_GRUPO_TODOS, msgFormateado);
+        difundirMensajeGrupo(cliente, Configuracion.ID_GRUPO_TODOS, msgParaOtros);
+    }
+    public String obtenerListaUsuarios(String usernameExcluir) {
+        List<String> usuarios = new ArrayList<>();
+        String sql = "SELECT username FROM usuarios WHERE username != ?";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, usernameExcluir);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) usuarios.add(rs.getString("username"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (usuarios.isEmpty()) return "[Info] No hay otros usuarios registrados.";
+        return "[Usuarios] " + String.join(", ", usuarios);
+    }
+    public synchronized boolean estaUsuarioConectado(String username) {
+        for (UnCliente cliente : clientesConectados) {
+            if (cliente.isLogueado() && cliente.getUsername().equals(username)) return true;
+        }
+        return false;
+    }
+    public synchronized void registrarMensajeEnArchivo(int grupoId, String mensajeFormateado) {
+        String nombreArchivo = Configuracion.CHAT_LOGS_DIR + "/" + grupoId + ".txt";
+
+        try (FileWriter fw = new FileWriter(nombreArchivo, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw, true)) {
+
+            out.println(mensajeFormateado);
+
+        } catch (IOException e) {
+            System.err.println("Error al escribir en el log del grupo " + grupoId + ": " + e.getMessage());
+        }
+    }
 public class ServidrMulti {
 
     public String obtenerCabeceraGrupo(int grupoId, String nombreGrupo) {
