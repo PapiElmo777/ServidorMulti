@@ -57,6 +57,49 @@ public class ServidorMulti {
             new Thread(nuevoCliente).start();
         }
     }
+    private static void inicializarBaseDeDatos() {
+        new File(Configuracion.CHAT_LOGS_DIR).mkdirs();
+        try {
+            Class.forName(Configuracion.DRIVER_CLASE);
+            try (Connection conn = conexionBD();
+                 Statement stmt = conn.createStatement()) {
+
+                crearTablas(stmt);
+                asegurarGrupoTodos(conn);
+                System.out.println("Base de datos SQLite y tablas de grupos listas.");
+
+            } catch (SQLException | IOException e) {
+                System.err.println("No se pudo inicializar la base de datos o los logs: " + e.getMessage());
+                System.exit(1);
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error CRÍTICO: No se encontró la clase del driver de SQLite.");
+            System.exit(1);
+        }
+    }
+    private static void crearTablas(Statement stmt) throws SQLException {
+        stmt.execute(Configuracion.SQL_CREATE_USUARIOS);
+        stmt.execute(Configuracion.SQL_CREATE_BLOQUEADOS);
+        stmt.execute(Configuracion.SQL_CREATE_RANKING);
+        stmt.execute(Configuracion.SQL_CREATE_GRUPOS);
+        stmt.execute(Configuracion.SQL_CREATE_GRUPO_MIEMBROS);
+    }
+    private static void asegurarGrupoTodos(Connection conn) throws SQLException, IOException {
+        String sqlInsertTodos = "INSERT OR IGNORE INTO grupos (grupo_id, nombre_grupo, creador_id, es_borrable) " +
+                "VALUES (?, ?, NULL, ?);";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertTodos)) {
+            pstmt.setInt(1, Configuracion.ID_GRUPO_TODOS);
+            pstmt.setString(2, Configuracion.NOMBRE_GRUPO_TODOS);
+            pstmt.setInt(3, Configuracion.ES_BORRABLE_NO);
+            pstmt.execute();
+        }
+        File logTodos = new File(Configuracion.CHAT_LOGS_DIR + "/" + Configuracion.ID_GRUPO_TODOS + ".txt");
+        if (logTodos.createNewFile()) {
+            System.out.println("Archivo de log para 'Todos' creado.");
+        } else {
+            System.out.println("Archivo de log para 'Todos' ya existía.");
+        }
+    }
 
 public class ServidrMulti {
 
