@@ -620,4 +620,175 @@ public class ServidorMulti {
         }
         return hayMensajes;
     }
+    private UnCliente obtenerClientePorUsername(String username) {
+        synchronized (clientesConectados) {
+            for (UnCliente cliente : clientesConectados) {
+                if (cliente.isLogueado() && cliente.getUsername().equals(username)) return cliente;
+            }
+            return null;
+        }
+    }
+    private JuegoGatito encontrarJuegoActivo(String username1, String username2) {
+        synchronized (juegosActivos) {
+            for (JuegoGatito juego : juegosActivos) {
+                if (juego.involucraA(username1, username2) && !juego.haTerminado()) return juego;
+            }
+            return null;
+        }
+    }
+    public void proponerJuego(UnCliente proponente, String oponenteUsername) {
+        if (!validarPropuestaJuego(proponente, oponenteUsername)) return;
+
+        UnCliente oponente = obtenerClientePorUsername(oponenteUsername);
+        propuestasPendientes.put(proponente.getUsername(), oponenteUsername);
+        proponente.out.println("Propuesta de juego enviada a '" + oponenteUsername + "'.");
+        oponente.out.println(proponente.getUsername() + " te ha retado a una partida de Gatito.");
+        oponente.out.println("Usa /aceptar " + proponente.getUsername() + " para empezar o /rechazar " + proponente.getUsername() + ".");
+    }
+    private boolean validarPropuestaJuego(UnCliente proponente, String oponenteUsername) {
+        if (proponente.getUsername().equals(oponenteUsername)) { proponente.out.println("No puedes jugar Gatito contigo mismo, socializa!!!"); return false; }
+        if (!existeUsuario(oponenteUsername)) { proponente.out.println("El shavalon '" + oponenteUsername + "' no está registrado."); return false; }
+        UnCliente oponente = obtenerClientePorUsername(oponenteUsername);
+        if (oponente == null) { proponente.out.println("El shavalon '" + oponenteUsername + "' no está conectado en este momento."); return false; }
+        if (proponente.getGrupoActualId() != oponente.getGrupoActualId()) { proponente.out.println("El shavalon '" + oponenteUsername + "' no está en tu grupo actual."); return false; }
+        if (estanBloqueados(proponente.getIdUsuario(), oponente.getIdUsuario())) { proponente.out.println("Shavalon, no puedes juagar con '" + oponenteUsername + "' porque estan enojados."); return false; }
+        if (encontrarJuegoActivo(proponente.getUsername(), oponenteUsername) != null) { proponente.out.println("Ya tienes un juego activo con '" + oponenteUsername + "'."); return false; }
+        if (propuestasPendientes.containsKey(proponente.getUsername())) { proponente.out.println("Ya tienes una propuesta pendiente enviada a '" + propuestasPendientes.get(proponente.getUsername()) + "'."); return false; }
+        if (yaTienePropuestaPendiente(proponente.getUsername())) { proponente.out.println("El shavalon ya te propuso un juego. Acepta o rechaza primero."); return false; }
+        if (propuestasPendientes.containsKey(oponenteUsername)) { proponente.out.println(oponenteUsername + " ya tiene una propuesta pendiente enviada a otro usuario."); return false; }
+        return true;
+    }
+    private boolean yaTienePropuestaPendiente(String username) {
+        for (String oponente : propuestasPendientes.values()) {
+            if (oponente.equals(username)) return true;
+        }
+        return false;
+    }
+    public void aceptarJuego(UnCliente aceptante, String proponenteUsername) {
+        if (!validarAceptacionJuego(aceptante, proponenteUsername)) return;
+
+        UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
+        propuestasPendientes.remove(proponenteUsername);
+        JuegoGatito nuevoJuego = new JuegoGatito(proponente, aceptante);
+        juegosActivos.add(nuevoJuego);
+    }
+    private boolean validarAceptacionJuego(UnCliente aceptante, String proponenteUsername) {
+        if (!propuestasPendientes.containsKey(proponenteUsername) ||
+                !propuestasPendientes.get(proponenteUsername).equals(aceptante.getUsername())) {
+            aceptante.out.println("No tienes una propuesta pendiente de '" + proponenteUsername + "'.");
+            return false;
+        }
+        UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
+        if (proponente == null) {
+            aceptante.out.println("El proponente se ha huido.");
+            propuestasPendientes.remove(proponenteUsername);
+            return false;
+        }
+        if (estanBloqueados(aceptante.getIdUsuario(), proponente.getIdUsuario())) {
+            aceptante.out.println("Shavalon, no puedes juagar con '" + proponenteUsername + "' porque estan enojados.");
+            propuestasPendientes.remove(proponenteUsername);
+            return false;
+        }
+        return true;
+    }
+    public void rechazarJuego(UnCliente rechazante, String proponenteUsername) {
+        if (!propuestasPendientes.containsKey(proponenteUsername) ||
+                !propuestasPendientes.get(proponenteUsername).equals(rechazante.getUsername())) {
+            rechazante.out.println("Shavalon, no tienes propuestas pendientes de '" + proponenteUsername + "'.");
+            return;
+        }
+        UnCliente proponente = obtenerClientePorUsername(proponenteUsername);
+        propuestasPendientes.remove(proponenteUsername);
+        rechazante.out.println("No quisiste jugar Gatito con '" + proponenteUsername + "'.");
+        if (proponente != null) {
+            proponente.out.println("Shavalon " + rechazante.getUsername() + " ha rechazado tu partidita, ff.");
+        }
+    }
+    private void removerJuego(JuegoGatito juego) {
+        synchronized (juegosActivos) { juegosActivos.remove(juego); }
+    }
+    private void forzarFinDeJuego(UnCliente perdedor) {
+        synchronized (juegosActivos) {
+            List<JuegoGatito> juegosARemover = new ArrayList<>();
+            for (JuegoGatito juego : juegosActivos) {
+                if (juego.esJugador(perdedor)) {
+                    juego.forzarTerminacion(perdedor);
+                    UnCliente ganador = juego.getGanador();
+                    if (ganador != null) registrarVictoria(ganador.getIdUsuario());
+                    registrarDerrota(perdedor.getIdUsuario());
+                    juegosARemover.add(juego);
+                }
+            }
+            juegosActivos.removeAll(juegosARemover);
+        }
+        String disconnectedUser = perdedor.getUsername();
+        propuestasPendientes.remove(disconnectedUser);
+        propuestasPendientes.values().removeIf(opponent -> opponent.equals(disconnectedUser));
+    }
+    public synchronized List<JuegoGatito> getJuegosActivos(UnCliente cliente) {
+        List<JuegoGatito> lista = new ArrayList<>();
+        synchronized (juegosActivos) {
+            for (JuegoGatito juego : juegosActivos) {
+                if (!juego.haTerminado() && juego.esJugador(cliente)) lista.add(juego);
+            }
+        }
+        return lista;
+    }
+    public synchronized int contarJuegosActivos(UnCliente cliente) {
+        return getJuegosActivos(cliente).size();
+    }
+    public synchronized void manejarMovimientoGatito(UnCliente cliente, String argumentos) {
+        List<JuegoGatito> juegosDelCliente = getJuegosActivos(cliente);
+        if (juegosDelCliente.isEmpty()) { cliente.out.println("No estás participando en ningún juego."); return; }
+
+        JuegoGatito juegoParaMover = obtenerJuegoParaMovimiento(cliente, argumentos, juegosDelCliente);
+        if (juegoParaMover == null) return;
+
+        String posStr = obtenerPosicion(argumentos, juegosDelCliente.size(), juegoParaMover);
+        if (posStr == null) return;
+
+        ejecutarMovimiento(cliente, juegoParaMover, posStr);
+    }
+    private JuegoGatito obtenerJuegoParaMovimiento(UnCliente cliente, String argumentos, List<JuegoGatito> juegos) {
+        if (juegos.size() == 1) return juegos.get(0);
+
+        String[] partes = argumentos.split(" ", 2);
+        if (partes.length < 2) {
+            cliente.out.println("Tienes " + juegos.size() + " partidas activas. Usa /mover <oponente> <1-9>.");
+            return null;
+        }
+        String oponenteNombre = partes[0];
+        for (JuegoGatito juego : juegos) {
+            if (juego.getOponente(cliente).getUsername().equalsIgnoreCase(oponenteNombre)) return juego;
+        }
+        cliente.out.println("No se encontró una partida activa con '" + oponenteNombre + "'.");
+        return null;
+    }
+    private String obtenerPosicion(String argumentos, int cantidadJuegos, JuegoGatito juego) {
+        if (cantidadJuegos == 1) return argumentos.trim();
+        String[] partes = argumentos.split(" ", 2);
+        return partes.length == 2 ? partes[1].trim() : null;
+    }
+    private void ejecutarMovimiento(UnCliente cliente, JuegoGatito juego, String posStr) {
+        try {
+            int posicion = Integer.parseInt(posStr);
+            if (juego.realizarMovimiento(cliente, posicion)) {
+                finalizarJuego(juego);
+            }
+        } catch (NumberFormatException e) {
+            cliente.out.println("Error: La posición '" + posStr + "' no es un número válido (1-9).");
+        }
+    }
+    private void finalizarJuego(JuegoGatito juego) {
+        if (juego.esEmpate()) {
+            registrarEmpate(juego.getJugadorX().getIdUsuario());
+            registrarEmpate(juego.getJugadorO().getIdUsuario());
+        } else {
+            UnCliente ganador = juego.getGanador();
+            UnCliente perdedor = juego.getOponente(ganador);
+            if (ganador != null) registrarVictoria(ganador.getIdUsuario());
+            if (perdedor != null) registrarDerrota(perdedor.getIdUsuario());
+        }
+        removerJuego(juego);
+    }
 }
