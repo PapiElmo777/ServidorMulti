@@ -791,4 +791,113 @@ public class ServidorMulti {
         }
         removerJuego(juego);
     }
+    public synchronized void registrarVictoria(int usuarioId) {
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 1, 0, 0, " + Configuracion.PUNTAJE_VICTORIA + ") " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET victorias = victorias + 1, puntaje = puntaje + " + Configuracion.PUNTAJE_VICTORIA;
+        ejecutarActualizacionRanking(usuarioId, sql);
+    }
+    public synchronized void registrarDerrota(int usuarioId) {
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 0, 1, 0, 0) " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET derrotas = derrotas + 1";
+        ejecutarActualizacionRanking(usuarioId, sql);
+    }
+    public synchronized void registrarEmpate(int usuarioId) {
+        String sql = "INSERT INTO ranking (usuario_id, victorias, derrotas, empates, puntaje) " +
+                "VALUES (?, 0, 0, 1, " + Configuracion.PUNTAJE_EMPATE + ") " +
+                "ON CONFLICT(usuario_id) DO UPDATE SET empates = empates + 1, puntaje = puntaje + " + Configuracion.PUNTAJE_EMPATE;
+        ejecutarActualizacionRanking(usuarioId, sql);
+    }
+    private void ejecutarActualizacionRanking(int usuarioId, String sql) {
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al registrar resultado: " + e.getMessage());
+        }
+    }
+    public synchronized int[] getEstadisticas(int usuarioId) {
+        String sql = "SELECT victorias, derrotas, empates, puntaje FROM ranking WHERE usuario_id = ?";
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, usuarioId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new int[]{
+                        rs.getInt("victorias"),
+                        rs.getInt("derrotas"),
+                        rs.getInt("empates"),
+                        rs.getInt("puntaje")
+                };
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener estadísticas: " + e.getMessage());
+        }
+        return new int[]{0, 0, 0, 0};
+    }
+    public void mostrarRanking(UnCliente solicitante) {
+        String sql = "SELECT u.username, r.victorias, r.derrotas, r.empates, r.puntaje " +
+                "FROM ranking r JOIN usuarios u ON r.usuario_id = u.id " +
+                "ORDER BY r.puntaje DESC, r.victorias DESC, r.derrotas ASC " +
+                "LIMIT 10";
+
+        try (Connection conn = conexionBD();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            String rankingTexto = formatearRanking(rs);
+            solicitante.out.println(rankingTexto);
+
+        } catch (SQLException e) {
+            solicitante.out.println("Error al obtener el ranking.");
+            e.printStackTrace();
+        }
+    }
+    private String formatearRanking(ResultSet rs) throws SQLException {
+        StringBuilder ranking = new StringBuilder("\n--- RANKING DE SHAVALONES (TOP 10) ---\n");
+        ranking.append(String.format("%-4s %-15s %-6s %-4s %-4s %-4s\n", "Pos", "Usuario", "Puntos", "V", "D", "E"));
+        ranking.append("-----------------------------------------------\n");
+
+        int pos = 1;
+        boolean hayDatos = false;
+        while (rs.next()) {
+            hayDatos = true;
+            ranking.append(String.format("%-4d %-15s %-6d %-4d %-4d %-4d\n",
+                    pos++,
+                    rs.getString("username"),
+                    rs.getInt("puntaje"),
+                    rs.getInt("victorias"),
+                    rs.getInt("derrotas"),
+                    rs.getInt("empates")));
+        }
+        if (!hayDatos) ranking.append("       Aún no hay shavalones en el ranking. ¡A jugar!\n");
+        ranking.append("-----------------------------------------------\n");
+        return ranking.toString();
+    }
+    public void compararEstadisticas(UnCliente solicitante, String oponenteUsername) {
+        int idOponente = obtenerIdUsuario(oponenteUsername);
+        if (idOponente == -1) { solicitante.out.println("Error: El usuario '" + oponenteUsername + "' no existe."); return; }
+
+        int[] statsSolicitante = getEstadisticas(solicitante.getIdUsuario());
+        int[] statsOponente = getEstadisticas(idOponente);
+
+        int victoriasTu = statsSolicitante[0];
+        int victoriasEl = statsOponente[0];
+
+        double totalVictorias = victoriasTu + victoriasEl;
+        if (totalVictorias == 0) {
+            solicitante.out.println("[Comparativa] Ambos tienen 0 victorias totales. ¡A jugar!");
+            return;
+        }
+
+        double porcTu = (victoriasTu / totalVictorias) * 100.0;
+        double porcEl = (victoriasEl / totalVictorias) * 100.0;
+
+        String comparativa = String.format("[Comparativa de Victorias] %s (%.0f%%) vs. %s (%.0f%%)",
+                solicitante.getUsername(), porcTu,
+                oponenteUsername, porcEl);
+
+        solicitante.out.println(comparativa);
+    }
 }
